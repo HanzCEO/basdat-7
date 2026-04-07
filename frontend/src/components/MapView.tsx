@@ -26,8 +26,8 @@ export default function MapView({ restaurants, onSelectRestaurant }: MapViewProp
       className="map-container"
     >
       <TileLayer
-        attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+        attribution='&copy; Esri'
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
       />
       {restaurants.map((restaurant) => (
         <Marker
