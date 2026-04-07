@@ -365,6 +365,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    height: 100%;
 
     &:hover {
       background: var(--color-blue-dark);
