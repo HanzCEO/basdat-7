@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "7890:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+    networks:
+      - app-net
+    environment:
+      - VITE_API_URL=http://localhost:7891
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "7891:8000"
+    depends_on:
+      - xampp
+    networks:
+      - app-net
+    environment:
+      - DB_HOST=xampp
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=
+      - DB_NAME=testdb
+
+  xampp:
+    image: tomsik68/xampp:8
+    ports:
+      - "8080:80"
+      - "3306:3306"
+    volumes:
+      - xampp-data:/opt/lampp
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  xampp-data:
