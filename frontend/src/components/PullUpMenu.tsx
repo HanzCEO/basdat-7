@@ -16,11 +16,15 @@ const SNAP_THRESHOLD = (COLLAPSED_HEIGHT + EXPANDED_HEIGHT) / 2;
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [_isExpanded, setIsExpanded] = useState(false);
   const [currentHeight, setCurrentHeight] = useState(COLLAPSED_HEIGHT);
+  const [isExpandedPesan, setIsExpandedPesan] = useState(false);
   const { totalItems, totalPrice } = useCart();
   
   const isDragging = useRef(false);
+  const isDraggingPesan = useRef(false);
   const dragStartY = useRef(0);
+  const dragStartX = useRef(0);
   const heightStart = useRef(COLLAPSED_HEIGHT);
+  const pesanButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleDragMove = useCallback((clientY: number) => {
     if (!isDragging.current) return;
@@ -28,6 +32,19 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     const newHeight = heightStart.current - delta;
     const clampedHeight = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
     setCurrentHeight(clampedHeight);
+  }, []);
+
+  const handlePesanDragMove = useCallback((clientX: number) => {
+    if (!isDraggingPesan.current || !pesanButtonRef.current) return;
+    const delta = dragStartX.current - clientX;
+    const buttonWidth = pesanButtonRef.current.offsetWidth;
+    const expandThreshold = buttonWidth * 0.5;
+    
+    if (delta > expandThreshold) {
+      setIsExpandedPesan(true);
+    } else {
+      setIsExpandedPesan(false);
+    }
   }, []);
 
   const handleDragEnd = useCallback(() => {
@@ -48,18 +65,38 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     });
   }, [onClose]);
 
+  const handlePesanDragEnd = useCallback(() => {
+    if (!isDraggingPesan.current) return;
+    isDraggingPesan.current = false;
+
+    if (isExpandedPesan) {
+      onDispatch();
+      setIsExpandedPesan(false);
+    }
+  }, [isExpandedPesan, onDispatch]);
+
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => handleDragMove(e.clientY);
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDragging.current) handleDragMove(e.clientY);
+      if (isDraggingPesan.current) handlePesanDragMove(e.clientX);
+    };
     const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
+      if (isDragging.current && e.touches.length > 0) {
         handleDragMove(e.touches[0].clientY);
-        if (isDragging.current) {
-          e.preventDefault();
-        }
+        e.preventDefault();
+      }
+      if (isDraggingPesan.current && e.touches.length > 0) {
+        handlePesanDragMove(e.touches[0].clientX);
       }
     };
-    const onMouseUp = () => handleDragEnd();
-    const onTouchEnd = () => handleDragEnd();
+    const onMouseUp = () => {
+      handleDragEnd();
+      handlePesanDragEnd();
+    };
+    const onTouchEnd = () => {
+      handleDragEnd();
+      handlePesanDragEnd();
+    };
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -72,13 +109,18 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("touchend", onTouchEnd);
     };
-  }, [handleDragMove, handleDragEnd]);
+  }, [handleDragMove, handlePesanDragMove, handleDragEnd, handlePesanDragEnd]);
 
   const handleDragStart = useCallback((clientY: number) => {
     isDragging.current = true;
     dragStartY.current = clientY;
     heightStart.current = currentHeight;
   }, [currentHeight]);
+
+  const handlePesanDragStart = useCallback((clientX: number) => {
+    isDraggingPesan.current = true;
+    dragStartX.current = clientX;
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -87,6 +129,15 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
 
   const handleTouchStart = (e: React.TouchEvent) => {
     handleDragStart(e.touches[0].clientY);
+  };
+
+  const handlePesanMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handlePesanDragStart(e.clientX);
+  };
+
+  const handlePesanTouchStart = (e: React.TouchEvent) => {
+    handlePesanDragStart(e.touches[0].clientX);
   };
 
   return (
@@ -125,7 +176,12 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
             <span className="cart-count">{totalItems} items</span>
             <span className="cart-total">Rp {totalPrice.toLocaleString()}</span>
           </div>
-          <button className="btn-dispatch" onClick={onDispatch}>
+          <button
+            ref={pesanButtonRef}
+            className={`btn-dispatch${isExpandedPesan ? " expanded" : ""}`}
+            onMouseDown={handlePesanMouseDown}
+            onTouchStart={handlePesanTouchStart}
+          >
             Pesan
           </button>
         </div>
