@@ -26,8 +26,8 @@ export default function MapView({ restaurants, onSelectRestaurant }: MapViewProp
       className="map-container"
     >
       <TileLayer
-        attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a>'
+        url="https://api.maptiler.com/tiles/light/{z}/{x}/{y}.png?key=VbirT4VB3VBpvWmGMZFI"
       />
       {restaurants.map((restaurant) => (
         <Marker
