@@ -14,85 +14,76 @@ const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
+  const [menuDragging, setMenuDragging] = useState(false);
   const [pesanOffset, setPesanOffset] = useState(0);
-  const [isPesanExpanded, setIsPesanExpanded] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const [pesanExpanded, setPesanExpanded] = useState(false);
   const { totalItems, totalPrice } = useCart();
   
-  const dragState = useRef({
-    type: "" as "" | "menu" | "pesan",
+  const dragRef = useRef({
     startY: 0,
     startX: 0,
     heightStart: COLLAPSED_HEIGHT,
     pesanStartOffset: 0,
   });
 
-  const handleDragMove = useCallback((clientY: number, clientX: number) => {
-    if (dragState.current.type === "menu") {
-      const delta = dragState.current.startY - clientY;
-      const newHeight = dragState.current.heightStart + delta;
+  const handlePointerMove = useCallback((clientY: number, clientX: number) => {
+    if (!menuDragging && pesanOffset === 0) return;
+
+    if (menuDragging) {
+      const delta = dragRef.current.startY - clientY;
+      const newHeight = dragRef.current.heightStart + delta;
       const clamped = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
       setMenuHeight(clamped);
-    } else if (dragState.current.type === "pesan") {
-      const delta = dragState.current.startX - clientX;
-      const newOffset = Math.max(0, dragState.current.pesanStartOffset + delta);
-      setPesanOffset(newOffset);
     }
-  }, []);
 
-  const handleDragEnd = useCallback(() => {
-    if (dragState.current.type === "menu") {
+    if (pesanOffset > 0 || pesanExpanded) {
+      const delta = dragRef.current.startX - clientX;
+      const newOffset = Math.max(0, dragRef.current.pesanStartOffset + delta);
+      setPesanOffset(newOffset);
+      if (newOffset > 150) {
+        setPesanExpanded(true);
+      } else {
+        setPesanExpanded(false);
+      }
+    }
+  }, [menuDragging, pesanOffset, pesanExpanded]);
+
+  const handlePointerUp = useCallback(() => {
+    if (menuDragging) {
       setMenuHeight((current) => {
         if (current < COLLAPSED_HEIGHT + 50) {
           if (current < COLLAPSED_HEIGHT / 2) {
             onClose();
           }
           return COLLAPSED_HEIGHT;
-        } else {
-          return EXPANDED_HEIGHT;
         }
+        return EXPANDED_HEIGHT;
       });
-    } else if (dragState.current.type === "pesan") {
-      setPesanOffset((currentOffset) => {
-        const barWidth = 420;
-        const threshold = barWidth * 0.7;
-        if (currentOffset > threshold) {
-          setIsPesanExpanded(true);
-          setTimeout(() => {
-            onDispatch();
-            setIsPesanExpanded(false);
-            setPesanOffset(0);
-          }, 150);
-          return currentOffset;
-        } else {
-          return 0;
-        }
-      });
+      setMenuDragging(false);
     }
-    dragState.current.type = "";
-    setIsDragging(false);
-  }, [onClose, onDispatch]);
+
+    if (pesanOffset > 0 || pesanExpanded) {
+      if (pesanExpanded) {
+        onDispatch();
+      }
+      setPesanOffset(0);
+      setPesanExpanded(false);
+    }
+
+    dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0 };
+  }, [menuDragging, pesanOffset, pesanExpanded, onClose, onDispatch]);
 
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      handleDragMove(e.clientY, e.clientX);
-    };
-
+    const onMouseMove = (e: MouseEvent) => handlePointerMove(e.clientY, e.clientX);
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
-      handleDragMove(e.touches[0].clientY, e.touches[0].clientX);
-      if (dragState.current.type === "menu") {
+      handlePointerMove(e.touches[0].clientY, e.touches[0].clientX);
+      if (menuDragging) {
         e.preventDefault();
       }
     };
-
-    const onMouseUp = () => {
-      handleDragEnd();
-    };
-
-    const onTouchEnd = () => {
-      handleDragEnd();
-    };
+    const onMouseUp = () => handlePointerUp();
+    const onTouchEnd = () => handlePointerUp();
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -105,28 +96,25 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("touchend", onTouchEnd);
     };
-  }, [handleDragMove, handleDragEnd]);
+  }, [handlePointerMove, handlePointerUp, menuDragging]);
 
   const handleMenuPointerDown = (clientY: number) => {
-    dragState.current = {
-      type: "menu",
+    dragRef.current = {
       startY: clientY,
       startX: 0,
       heightStart: menuHeight,
       pesanStartOffset: 0,
     };
-    setIsDragging(true);
+    setMenuDragging(true);
   };
 
   const handlePesanPointerDown = (clientX: number) => {
-    dragState.current = {
-      type: "pesan",
+    dragRef.current = {
       startY: 0,
       startX: clientX,
       heightStart: 0,
       pesanStartOffset: pesanOffset,
     };
-    setIsDragging(true);
   };
 
   return (
@@ -134,7 +122,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       className="pullup-menu"
       style={{
         height: `${menuHeight}px`,
-        transition: isDragging ? "none" : "all 0.3s ease",
+        transition: menuDragging ? "none" : "height 0.3s ease",
       }}
     >
       <div
@@ -170,10 +158,9 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
             <span className="cart-total">Rp {totalPrice.toLocaleString()}</span>
           </div>
           <button
-            className={`btn-dispatch${isPesanExpanded ? " expanded" : ""}`}
+            className={`btn-dispatch${pesanExpanded ? " expanded" : ""}`}
             style={{
-              transform: isPesanExpanded ? "translateX(0)" : `translateX(-${pesanOffset}px)`,
-              transition: isDragging && dragState.current.type === "pesan" ? "none" : "transform 0.3s ease",
+              transform: `translateX(-${pesanOffset}px)`,
             }}
             onMouseDown={(e) => {
               e.preventDefault();
