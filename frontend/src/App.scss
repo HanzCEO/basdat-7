@@ -26,6 +26,7 @@ body {
   max-width: 420px;
   margin: 0 auto;
   overflow: hidden;
+  position: relative;
 }
 
 .search-container {
@@ -251,11 +252,8 @@ body {
 .pullup-menu {
   position: absolute;
   bottom: 0;
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 420px;
+  left: 0;
+  right: 0;
   background: var(--color-white);
   border-radius: 16px 16px 0 0;
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.15);
