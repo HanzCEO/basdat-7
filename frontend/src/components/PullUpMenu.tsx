@@ -155,10 +155,9 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
             <span className="cart-total">Rp {totalPrice.toLocaleString()}</span>
           </div>
           <button
-            className={`btn-dispatch${pesanExpanded || isPesanDragging ? " expanded" : ""}`}
+            className={`btn-dispatch${pesanExpanded ? " expanded" : ""}`}
             style={{
               transform: `translateX(-${pesanOffset}px)`,
-              flex: isPesanDragging ? 1 : undefined,
             }}
             onMouseDown={(e) => {
               e.preventDefault();
