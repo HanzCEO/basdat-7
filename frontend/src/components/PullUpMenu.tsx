@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Restaurant } from "../types";
 import MenuItem from "./MenuItem";
 import { useCart } from "../context/CartContext";
@@ -10,84 +10,90 @@ interface PullUpMenuProps {
 }
 
 const COLLAPSED_HEIGHT = 120;
-const EXPANDED_HEIGHT = window.innerHeight * 0.8;
+const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
+const SNAP_THRESHOLD = (COLLAPSED_HEIGHT + EXPANDED_HEIGHT) / 2;
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
+  const [_isExpanded, setIsExpanded] = useState(false);
+  const [currentHeight, setCurrentHeight] = useState(COLLAPSED_HEIGHT);
   const { totalItems, totalPrice } = useCart();
+  
+  const isDragging = useRef(false);
   const dragStartY = useRef(0);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const heightStart = useRef(COLLAPSED_HEIGHT);
 
-  const handleDragStart = (clientY: number) => {
-    setIsDragging(true);
+  const handleDragStart = useCallback((clientY: number) => {
+    isDragging.current = true;
     dragStartY.current = clientY;
-    setDragOffset(0);
-  };
+    heightStart.current = currentHeight;
+  }, [currentHeight]);
 
-  const handleDragMove = (clientY: number) => {
-    if (!isDragging) return;
+  const handleDragMove = useCallback((clientY: number) => {
+    if (!isDragging.current) return;
     const delta = clientY - dragStartY.current;
-    setDragOffset(delta);
-  };
+    const newHeight = heightStart.current - delta;
+    const clampedHeight = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
+    setCurrentHeight(clampedHeight);
+  }, []);
 
-  const handleDragEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const finalOffset = dragOffset;
-    setDragOffset(0);
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
 
-    if (finalOffset < -50) {
-      setIsExpanded(true);
-    } else if (finalOffset > 50) {
+    if (currentHeight < SNAP_THRESHOLD) {
       setIsExpanded(false);
-      if (finalOffset > 150) {
+      setCurrentHeight(COLLAPSED_HEIGHT);
+      if (currentHeight < COLLAPSED_HEIGHT / 2) {
         onClose();
       }
+    } else {
+      setIsExpanded(true);
+      setCurrentHeight(EXPANDED_HEIGHT);
     }
+  }, [currentHeight, onClose]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientY);
   };
 
-  useEffect(() => {
-    const handleMouseUp = () => handleDragEnd();
-    const handleTouchEnd = () => handleDragEnd();
+  const handleMouseMove = (e: React.MouseEvent) => {
+    handleDragMove(e.clientY);
+  };
 
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("touchend", handleTouchEnd);
+  const handleMouseUp = () => {
+    handleDragEnd();
+  };
 
-    return () => {
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [isDragging, dragOffset]);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.touches[0].clientY);
+  };
 
-  const menuHeight = isExpanded
-    ? EXPANDED_HEIGHT
-    : isDragging
-    ? COLLAPSED_HEIGHT - dragOffset
-    : COLLAPSED_HEIGHT;
+  const handleTouchMove = (e: React.TouchEvent) => {
+    handleDragMove(e.touches[0].clientY);
+  };
 
-  const bottomOffset = isExpanded
-    ? 0
-    : isDragging
-    ? dragOffset
-    : 0;
+  const handleTouchEnd = () => {
+    handleDragEnd();
+  };
 
   return (
     <div
-      ref={menuRef}
       className="pullup-menu"
       style={{
-        height: `${menuHeight}px`,
-        transform: `translateY(${bottomOffset}px)`,
-        transition: isDragging ? "none" : "all 0.3s ease",
+        height: `${currentHeight}px`,
+        transition: isDragging.current ? "none" : "all 0.3s ease",
       }}
-      onMouseDown={(e) => handleDragStart(e.clientY)}
-      onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
-      onMouseMove={(e) => handleDragMove(e.clientY)}
-      onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
     >
-      <div className="pullup-handle" />
+      <div
+        className="pullup-handle"
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onMouseMove={handleMouseMove}
+        onTouchMove={handleTouchMove}
+        onMouseUp={handleMouseUp}
+        onTouchEnd={handleTouchEnd}
+      />
 
       <div className="pullup-content">
         <header className="pullup-header">
