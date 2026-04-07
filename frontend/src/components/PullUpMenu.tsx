@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Restaurant } from "../types";
 import MenuItem from "./MenuItem";
 import { useCart } from "../context/CartContext";
@@ -16,6 +16,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
   const [pesanOffset, setPesanOffset] = useState(0);
   const [isPesanExpanded, setIsPesanExpanded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { totalItems, totalPrice } = useCart();
   
   const dragState = useRef({
@@ -26,35 +27,20 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     pesanStartOffset: 0,
   });
 
-  const onMouseMove = (e: MouseEvent) => {
+  const handleDragMove = useCallback((clientY: number, clientX: number) => {
     if (dragState.current.type === "menu") {
-      const delta = dragState.current.startY - e.clientY;
+      const delta = dragState.current.startY - clientY;
       const newHeight = dragState.current.heightStart + delta;
       const clamped = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
       setMenuHeight(clamped);
     } else if (dragState.current.type === "pesan") {
-      const delta = dragState.current.startX - e.clientX;
+      const delta = dragState.current.startX - clientX;
       const newOffset = Math.max(0, dragState.current.pesanStartOffset + delta);
       setPesanOffset(newOffset);
     }
-  };
+  }, []);
 
-  const onTouchMove = (e: TouchEvent) => {
-    if (e.touches.length === 0) return;
-    if (dragState.current.type === "menu") {
-      const delta = dragState.current.startY - e.touches[0].clientY;
-      const newHeight = dragState.current.heightStart + delta;
-      const clamped = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
-      setMenuHeight(clamped);
-      e.preventDefault();
-    } else if (dragState.current.type === "pesan") {
-      const delta = dragState.current.startX - e.touches[0].clientX;
-      const newOffset = Math.max(0, dragState.current.pesanStartOffset + delta);
-      setPesanOffset(newOffset);
-    }
-  };
-
-  const onMouseUp = () => {
+  const handleDragEnd = useCallback(() => {
     if (dragState.current.type === "menu") {
       setMenuHeight((current) => {
         if (current < COLLAPSED_HEIGHT + 50) {
@@ -81,11 +67,42 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       }
     }
     dragState.current.type = "";
-  };
+    setIsDragging(false);
+  }, [pesanOffset, onClose, onDispatch]);
 
-  const onTouchEnd = () => {
-    onMouseUp();
-  };
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      handleDragMove(e.clientY, e.clientX);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      handleDragMove(e.touches[0].clientY, e.touches[0].clientX);
+      if (dragState.current.type === "menu") {
+        e.preventDefault();
+      }
+    };
+
+    const onMouseUp = () => {
+      handleDragEnd();
+    };
+
+    const onTouchEnd = () => {
+      handleDragEnd();
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [handleDragMove, handleDragEnd]);
 
   const handleMenuPointerDown = (clientY: number) => {
     dragState.current = {
@@ -95,6 +112,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       heightStart: menuHeight,
       pesanStartOffset: 0,
     };
+    setIsDragging(true);
   };
 
   const handlePesanPointerDown = (clientX: number) => {
@@ -105,9 +123,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       heightStart: 0,
       pesanStartOffset: pesanOffset,
     };
+    setIsDragging(true);
   };
-
-  const isDragging = dragState.current.type !== "";
 
   return (
     <div
@@ -116,10 +133,6 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         height: `${menuHeight}px`,
         transition: isDragging ? "none" : "all 0.3s ease",
       }}
-      onMouseMove={onMouseMove as unknown as React.MouseEventHandler}
-      onTouchMove={onTouchMove as unknown as React.TouchEventHandler}
-      onMouseUp={onMouseUp as unknown as React.MouseEventHandler}
-      onTouchEnd={onTouchEnd as unknown as React.TouchEventHandler}
     >
       <div
         className="pullup-handle"
@@ -127,7 +140,11 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         onTouchStart={(e) => handleMenuPointerDown(e.touches[0].clientY)}
       />
 
-      <div className="pullup-content">
+      <div
+        className="pullup-content"
+        onMouseDown={(e) => handleMenuPointerDown(e.clientY)}
+        onTouchStart={(e) => handleMenuPointerDown(e.touches[0].clientY)}
+      >
         <header className="pullup-header">
           <div className="pullup-info">
             <h2>{restaurant.name}</h2>
