@@ -4,12 +4,24 @@ import { useCart } from "../context/CartContext";
 interface MenuItemProps {
   item: MenuItemType;
   restaurantId: string;
+  restaurantName: string;
 }
 
-export default function MenuItem({ item, restaurantId }: MenuItemProps) {
-  const { addItem, removeItem, items } = useCart();
+export default function MenuItem({ item, restaurantId, restaurantName }: MenuItemProps) {
+  const { addItem, removeItem, items, setPendingItem } = useCart();
   const cartItem = items.find((c) => c.item.id === item.id);
   const quantity = cartItem?.quantity || 0;
+
+  const existingRestaurantId = items[0]?.restaurantId;
+  const isDifferentRestaurant = existingRestaurantId && existingRestaurantId !== restaurantId;
+
+  const handleAdd = () => {
+    if (isDifferentRestaurant) {
+      setPendingItem(item, restaurantId, restaurantName);
+    } else {
+      addItem(item, restaurantId);
+    }
+  };
 
   return (
     <div className="menu-item">
@@ -27,10 +39,7 @@ export default function MenuItem({ item, restaurantId }: MenuItemProps) {
           -
         </button>
         <span className="quantity">{quantity}</span>
-        <button
-          className="btn-plus"
-          onClick={() => addItem(item, restaurantId)}
-        >
+        <button className="btn-plus" onClick={handleAdd}>
           +
         </button>
       </div>
