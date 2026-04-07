@@ -23,6 +23,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 .search-container {
@@ -254,4 +256,32 @@ body {
 .leaflet-container {
   height: 100%;
   width: 100%;
+}
+
+.leaflet-control-zoom {
+  bottom: 80px;
+  right: 16px;
+  top: auto;
+  left: auto;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-control-zoom a {
+  background: var(--color-white);
+  color: var(--color-black);
+  border: 1px solid var(--color-gray-light);
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 18px;
+}
+
+.leaflet-control-zoom-in {
+  border-radius: 8px 8px 0 0;
+}
+
+.leaflet-control-zoom-out {
+  border-radius: 0 0 8px 8px;
+  border-top: none;
 }
