@@ -11,6 +11,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 body {
@@ -48,6 +49,7 @@ body {
     border-radius: 8px 0 0 8px;
     font-size: 16px;
     outline: none;
+    font-family: inherit;
 
     &:focus {
       border-color: var(--color-blue);
@@ -76,6 +78,7 @@ body {
 
 .restaurant-popup {
   padding: 8px;
+  font-family: "Quicksand", sans-serif;
 
   h3 {
     font-size: 16px;
