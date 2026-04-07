@@ -11,7 +11,6 @@ interface PullUpMenuProps {
 
 const COLLAPSED_HEIGHT = 120;
 const EXPANDED_HEIGHT = window.innerHeight * 0.8;
-const SNAP_THRESHOLD = (COLLAPSED_HEIGHT + EXPANDED_HEIGHT) / 2;
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [isExpanded, setIsExpanded] = useState(false);
