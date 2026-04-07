@@ -11,7 +11,6 @@ interface PullUpMenuProps {
 
 const COLLAPSED_HEIGHT = 120;
 const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
-const PESAN_THRESHOLD = 150;
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
@@ -25,9 +24,11 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     startX: 0,
     heightStart: COLLAPSED_HEIGHT,
     pesanStartOffset: 0,
+    dispatchThreshold: 0,
   });
   const pesanButtonRef = useRef<HTMLButtonElement>(null);
   const originalWidthRef = useRef(0);
+  const containerWidthRef = useRef(0);
 
   const handlePointerMove = useCallback((clientY: number, clientX: number) => {
     if (isMenuDragging) {
@@ -59,14 +60,14 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     }
 
     if (isPesanDragging) {
-      if (pesanOffset > PESAN_THRESHOLD) {
+      if (pesanOffset >= dragRef.current.dispatchThreshold) {
         onDispatch();
       }
       setPesanOffset(0);
       setIsPesanDragging(false);
     }
 
-    dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0 };
+    dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0, dispatchThreshold: 0 };
   }, [isMenuDragging, isPesanDragging, pesanOffset, onClose, onDispatch]);
 
   useEffect(() => {
@@ -100,6 +101,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       startX: 0,
       heightStart: menuHeight,
       pesanStartOffset: 0,
+      dispatchThreshold: 0,
     };
     setIsMenuDragging(true);
   };
@@ -107,12 +109,14 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   const handlePesanPointerDown = (clientX: number) => {
     if (pesanButtonRef.current) {
       originalWidthRef.current = pesanButtonRef.current.offsetWidth;
+      containerWidthRef.current = pesanButtonRef.current.parentElement?.clientWidth || 420;
     }
     dragRef.current = {
       startY: 0,
       startX: clientX,
       heightStart: 0,
       pesanStartOffset: pesanOffset,
+      dispatchThreshold: containerWidthRef.current - originalWidthRef.current,
     };
     setIsPesanDragging(true);
   };
@@ -166,6 +170,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
               position: isPesanDragging ? "absolute" : "relative",
               right: 0,
               width: pesanWidth,
+              borderRadius: isPesanDragging && pesanOffset >= dragRef.current.dispatchThreshold ? 0 : 8,
               zIndex: isPesanDragging ? 10 : 2,
             }}
             onMouseDown={(e) => {
