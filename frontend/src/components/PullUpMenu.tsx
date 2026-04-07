@@ -14,6 +14,7 @@ const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
+  const [pesanOffset, setPesanOffset] = useState(0);
   const [isPesanExpanded, setIsPesanExpanded] = useState(false);
   const { totalItems, totalPrice } = useCart();
   
@@ -22,6 +23,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     startY: 0,
     startX: 0,
     heightStart: COLLAPSED_HEIGHT,
+    pesanStartOffset: 0,
   });
 
   const onMouseMove = (e: MouseEvent) => {
@@ -32,7 +34,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       setMenuHeight(clamped);
     } else if (dragState.current.type === "pesan") {
       const delta = dragState.current.startX - e.clientX;
-      setIsPesanExpanded(delta > 50);
+      const newOffset = Math.max(0, dragState.current.pesanStartOffset + delta);
+      setPesanOffset(newOffset);
     }
   };
 
@@ -46,7 +49,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       e.preventDefault();
     } else if (dragState.current.type === "pesan") {
       const delta = dragState.current.startX - e.touches[0].clientX;
-      setIsPesanExpanded(delta > 50);
+      const newOffset = Math.max(0, dragState.current.pesanStartOffset + delta);
+      setPesanOffset(newOffset);
     }
   };
 
@@ -63,10 +67,18 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         }
       });
     } else if (dragState.current.type === "pesan") {
-      if (isPesanExpanded) {
-        onDispatch();
+      const barWidth = 420;
+      const threshold = barWidth * 0.7;
+      if (pesanOffset > threshold) {
+        setIsPesanExpanded(true);
+        setTimeout(() => {
+          onDispatch();
+          setIsPesanExpanded(false);
+          setPesanOffset(0);
+        }, 150);
+      } else {
+        setPesanOffset(0);
       }
-      setIsPesanExpanded(false);
     }
     dragState.current.type = "";
   };
@@ -81,6 +93,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       startY: clientY,
       startX: 0,
       heightStart: menuHeight,
+      pesanStartOffset: 0,
     };
   };
 
@@ -90,6 +103,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       startY: 0,
       startX: clientX,
       heightStart: 0,
+      pesanStartOffset: pesanOffset,
     };
   };
 
@@ -137,6 +151,10 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
           </div>
           <button
             className={`btn-dispatch${isPesanExpanded ? " expanded" : ""}`}
+            style={{
+              transform: `translateX(-${pesanOffset}px)`,
+              transition: isDragging && dragState.current.type === "pesan" ? "none" : "transform 0.3s ease",
+            }}
             onMouseDown={(e) => {
               e.preventDefault();
               handlePesanPointerDown(e.clientX);
