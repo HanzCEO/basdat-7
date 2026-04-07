@@ -4,8 +4,7 @@ import { Restaurant } from "./types";
 import { restaurants } from "./data/mockData";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
-import RestaurantDetail from "./components/RestaurantDetail";
-import CartBar from "./components/CartBar";
+import PullUpMenu from "./components/PullUpMenu";
 import "./App.scss";
 
 function AppContent() {
@@ -23,18 +22,6 @@ function AppContent() {
     alert("Driver dispatched! (Mock)");
   };
 
-  if (selectedRestaurant) {
-    return (
-      <div className="app">
-        <RestaurantDetail
-          restaurant={selectedRestaurant}
-          onBack={() => setSelectedRestaurant(null)}
-        />
-        <CartBar onDispatch={handleDispatch} />
-      </div>
-    );
-  }
-
   return (
     <div className="app">
       <div className="search-container">
@@ -44,7 +31,13 @@ function AppContent() {
         restaurants={filteredRestaurants}
         onSelectRestaurant={setSelectedRestaurant}
       />
-      <CartBar onDispatch={handleDispatch} />
+      {selectedRestaurant && (
+        <PullUpMenu
+          restaurant={selectedRestaurant}
+          onClose={() => setSelectedRestaurant(null)}
+          onDispatch={handleDispatch}
+        />
+      )}
     </div>
   );
 }
