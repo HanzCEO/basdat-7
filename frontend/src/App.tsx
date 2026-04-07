@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CartProvider } from "./context/CartContext";
 import { Restaurant } from "./types";
 import { restaurants } from "./data/mockData";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
 import PullUpMenu from "./components/PullUpMenu";
+import Onboarding, { checkOnboardingCompleted } from "./components/Onboarding";
 import "./App.scss";
 
 function AppContent() {
@@ -43,9 +44,23 @@ function AppContent() {
 }
 
 function App() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    setShowOnboarding(!checkOnboardingCompleted());
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
   return (
     <CartProvider>
-      <AppContent />
+      {showOnboarding ? (
+        <Onboarding onComplete={handleOnboardingComplete} />
+      ) : (
+        <AppContent />
+      )}
     </CartProvider>
   );
 }
