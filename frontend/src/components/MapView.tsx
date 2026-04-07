@@ -41,9 +41,7 @@ export default function MapView({ restaurants, onSelectRestaurant }: MapViewProp
           <Popup>
             <div className="restaurant-popup">
               <h3>{restaurant.name}</h3>
-              <p>{restaurant.cuisine}</p>
-              <p>Rating: {restaurant.rating}</p>
-              <button onClick={() => onSelectRestaurant(restaurant)}>View Menu</button>
+              <p>{restaurant.cuisine} • {restaurant.rating} ★</p>
             </div>
           </Popup>
         </Marker>
