@@ -378,12 +378,6 @@ body {
     &:hover {
       background: var(--color-blue-dark);
     }
-
-    &.expanded {
-      flex: 1;
-      border-radius: 0;
-      text-align: center;
-    }
   }
 }
 

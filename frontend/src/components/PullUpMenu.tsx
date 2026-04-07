@@ -11,13 +11,13 @@ interface PullUpMenuProps {
 
 const COLLAPSED_HEIGHT = 120;
 const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
+const PESAN_THRESHOLD = 150;
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
   const [isMenuDragging, setIsMenuDragging] = useState(false);
   const [isPesanDragging, setIsPesanDragging] = useState(false);
   const [pesanOffset, setPesanOffset] = useState(0);
-  const [pesanExpanded, setPesanExpanded] = useState(false);
   const { totalItems, totalPrice } = useCart();
   
   const dragRef = useRef({
@@ -26,6 +26,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     heightStart: COLLAPSED_HEIGHT,
     pesanStartOffset: 0,
   });
+  const pesanButtonRef = useRef<HTMLButtonElement>(null);
+  const originalWidthRef = useRef(0);
 
   const handlePointerMove = useCallback((clientY: number, clientX: number) => {
     if (isMenuDragging) {
@@ -39,7 +41,6 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       const delta = dragRef.current.startX - clientX;
       const newOffset = Math.max(0, dragRef.current.pesanStartOffset + delta);
       setPesanOffset(newOffset);
-      setPesanExpanded(newOffset > 150);
     }
   }, [isMenuDragging, isPesanDragging]);
 
@@ -58,16 +59,15 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     }
 
     if (isPesanDragging) {
-      if (pesanExpanded) {
+      if (pesanOffset > PESAN_THRESHOLD) {
         onDispatch();
       }
       setPesanOffset(0);
-      setPesanExpanded(false);
       setIsPesanDragging(false);
     }
 
     dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0 };
-  }, [isMenuDragging, isPesanDragging, pesanExpanded, onClose, onDispatch]);
+  }, [isMenuDragging, isPesanDragging, pesanOffset, onClose, onDispatch]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => handlePointerMove(e.clientY, e.clientX);
@@ -105,6 +105,9 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   };
 
   const handlePesanPointerDown = (clientX: number) => {
+    if (pesanButtonRef.current) {
+      originalWidthRef.current = pesanButtonRef.current.offsetWidth;
+    }
     dragRef.current = {
       startY: 0,
       startX: clientX,
@@ -113,6 +116,9 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     };
     setIsPesanDragging(true);
   };
+
+  const pesanWidth = isPesanDragging ? originalWidthRef.current + pesanOffset : undefined;
+  const pesanLeft = isPesanDragging ? -pesanOffset : undefined;
 
   return (
     <div
@@ -155,9 +161,14 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
             <span className="cart-total">Rp {totalPrice.toLocaleString()}</span>
           </div>
           <button
-            className={`btn-dispatch${pesanExpanded ? " expanded" : ""}`}
+            ref={pesanButtonRef}
+            className="btn-dispatch"
             style={{
-              transform: `translateX(-${pesanOffset}px)`,
+              position: isPesanDragging ? "absolute" : "relative",
+              right: isPesanDragging ? 0 : undefined,
+              width: pesanWidth,
+              left: pesanLeft,
+              zIndex: isPesanDragging ? 10 : 2,
             }}
             onMouseDown={(e) => {
               e.preventDefault();
