@@ -126,7 +126,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
             <span className="cart-total">Rp {totalPrice.toLocaleString()}</span>
           </div>
           <button className="btn-dispatch" onClick={onDispatch}>
-            Dispatch Driver
+            Pesan
           </button>
         </div>
       )}
