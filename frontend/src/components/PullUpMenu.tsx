@@ -170,7 +170,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
               position: isPesanDragging ? "absolute" : "relative",
               right: 0,
               width: pesanWidth,
-              borderRadius: isPesanDragging && pesanOffset >= dragRef.current.dispatchThreshold ? 0 : 8,
+              borderRadius: isPesanDragging ? 0 : undefined,
               zIndex: isPesanDragging ? 10 : 2,
             }}
             onMouseDown={(e) => {
