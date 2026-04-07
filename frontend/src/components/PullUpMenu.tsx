@@ -74,7 +74,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
       handlePointerMove(e.touches[0].clientY, e.touches[0].clientX);
-      if (isMenuDragging) {
+      if (isMenuDragging || isPesanDragging) {
         e.preventDefault();
       }
     };
@@ -92,7 +92,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("touchend", onTouchEnd);
     };
-  }, [handlePointerMove, handlePointerUp, isMenuDragging]);
+  }, [handlePointerMove, handlePointerUp, isMenuDragging, isPesanDragging]);
 
   const handleMenuPointerDown = (clientY: number) => {
     dragRef.current = {
