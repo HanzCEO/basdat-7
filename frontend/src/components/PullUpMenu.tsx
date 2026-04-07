@@ -118,7 +118,6 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   };
 
   const pesanWidth = isPesanDragging ? originalWidthRef.current + pesanOffset : undefined;
-  const pesanLeft = isPesanDragging ? -pesanOffset : undefined;
 
   return (
     <div
@@ -165,9 +164,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
             className="btn-dispatch"
             style={{
               position: isPesanDragging ? "absolute" : "relative",
-              right: isPesanDragging ? 0 : undefined,
+              right: 0,
               width: pesanWidth,
-              left: pesanLeft,
               zIndex: isPesanDragging ? 10 : 2,
             }}
             onMouseDown={(e) => {
