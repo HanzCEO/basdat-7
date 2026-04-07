@@ -14,7 +14,8 @@ const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
-  const [menuDragging, setMenuDragging] = useState(false);
+  const [isMenuDragging, setIsMenuDragging] = useState(false);
+  const [isPesanDragging, setIsPesanDragging] = useState(false);
   const [pesanOffset, setPesanOffset] = useState(0);
   const [pesanExpanded, setPesanExpanded] = useState(false);
   const { totalItems, totalPrice } = useCart();
@@ -27,29 +28,23 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   });
 
   const handlePointerMove = useCallback((clientY: number, clientX: number) => {
-    if (!menuDragging && pesanOffset === 0) return;
-
-    if (menuDragging) {
+    if (isMenuDragging) {
       const delta = dragRef.current.startY - clientY;
       const newHeight = dragRef.current.heightStart + delta;
       const clamped = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
       setMenuHeight(clamped);
     }
 
-    if (pesanOffset > 0 || pesanExpanded) {
+    if (isPesanDragging) {
       const delta = dragRef.current.startX - clientX;
       const newOffset = Math.max(0, dragRef.current.pesanStartOffset + delta);
       setPesanOffset(newOffset);
-      if (newOffset > 150) {
-        setPesanExpanded(true);
-      } else {
-        setPesanExpanded(false);
-      }
+      setPesanExpanded(newOffset > 150);
     }
-  }, [menuDragging, pesanOffset, pesanExpanded]);
+  }, [isMenuDragging, isPesanDragging]);
 
   const handlePointerUp = useCallback(() => {
-    if (menuDragging) {
+    if (isMenuDragging) {
       setMenuHeight((current) => {
         if (current < COLLAPSED_HEIGHT + 50) {
           if (current < COLLAPSED_HEIGHT / 2) {
@@ -59,26 +54,27 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         }
         return EXPANDED_HEIGHT;
       });
-      setMenuDragging(false);
+      setIsMenuDragging(false);
     }
 
-    if (pesanOffset > 0 || pesanExpanded) {
+    if (isPesanDragging) {
       if (pesanExpanded) {
         onDispatch();
       }
       setPesanOffset(0);
       setPesanExpanded(false);
+      setIsPesanDragging(false);
     }
 
     dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0 };
-  }, [menuDragging, pesanOffset, pesanExpanded, onClose, onDispatch]);
+  }, [isMenuDragging, isPesanDragging, pesanExpanded, onClose, onDispatch]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => handlePointerMove(e.clientY, e.clientX);
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
       handlePointerMove(e.touches[0].clientY, e.touches[0].clientX);
-      if (menuDragging) {
+      if (isMenuDragging) {
         e.preventDefault();
       }
     };
@@ -96,7 +92,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("touchend", onTouchEnd);
     };
-  }, [handlePointerMove, handlePointerUp, menuDragging]);
+  }, [handlePointerMove, handlePointerUp, isMenuDragging]);
 
   const handleMenuPointerDown = (clientY: number) => {
     dragRef.current = {
@@ -105,7 +101,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       heightStart: menuHeight,
       pesanStartOffset: 0,
     };
-    setMenuDragging(true);
+    setIsMenuDragging(true);
   };
 
   const handlePesanPointerDown = (clientX: number) => {
@@ -115,6 +111,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       heightStart: 0,
       pesanStartOffset: pesanOffset,
     };
+    setIsPesanDragging(true);
   };
 
   return (
@@ -122,7 +119,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
       className="pullup-menu"
       style={{
         height: `${menuHeight}px`,
-        transition: menuDragging ? "none" : "height 0.3s ease",
+        transition: isMenuDragging ? "none" : "height 0.3s ease",
       }}
     >
       <div
