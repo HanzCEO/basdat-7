@@ -53,13 +53,16 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         handleDragMove(e.touches[0].clientY);
+        if (isDragging.current) {
+          e.preventDefault();
+        }
       }
     };
     const onMouseUp = () => handleDragEnd();
     const onTouchEnd = () => handleDragEnd();
 
     document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("touchmove", onTouchMove);
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener("touchend", onTouchEnd);
 
@@ -71,8 +74,6 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     };
   }, [handleDragMove, handleDragEnd]);
 
-  const DRAG_THRESHOLD_Y = 80;
-
   const handleDragStart = useCallback((clientY: number) => {
     isDragging.current = true;
     dragStartY.current = clientY;
@@ -80,13 +81,11 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   }, [currentHeight]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.clientY > DRAG_THRESHOLD_Y) return;
     e.preventDefault();
     handleDragStart(e.clientY);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches[0].clientY > DRAG_THRESHOLD_Y) return;
     handleDragStart(e.touches[0].clientY);
   };
 
