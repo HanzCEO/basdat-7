@@ -61,13 +61,16 @@ body {
   }
 
   button {
-    padding: 12px 20px;
+    padding: 12px;
     background: var(--color-blue);
     color: var(--color-white);
     border: none;
     border-radius: 0 8px 8px 0;
     font-size: 16px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
       background: var(--color-blue-dark);
