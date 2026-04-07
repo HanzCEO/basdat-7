@@ -29,7 +29,6 @@ body {
 }
 
 .search-container {
-  padding: 16px;
   flex-shrink: 0;
 }
 
@@ -38,8 +37,6 @@ body {
   gap: 8px;
   background: var(--color-white);
   padding: 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   input {
     flex: 1;
