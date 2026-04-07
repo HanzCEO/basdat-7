@@ -27,7 +27,7 @@ export default function MapView({ restaurants, onSelectRestaurant }: MapViewProp
     >
       <TileLayer
         attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a>'
-        url="https://api.maptiler.com/maps/base-v4-light/{z}/{x}/{y}.png?key=7YGFx6IJMbItHm2OZuIY"
+        url="https://api.maptiler.com/maps/base-v4-light/{z}/{x}/{y}@2x.png?key=7YGFx6IJMbItHm2OZuIY"
       />
       {restaurants.map((restaurant) => (
         <Marker
