@@ -71,6 +71,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     };
   }, [handleDragMove, handleDragEnd]);
 
+  const DRAG_THRESHOLD_Y = 80;
+
   const handleDragStart = useCallback((clientY: number) => {
     isDragging.current = true;
     dragStartY.current = clientY;
@@ -78,11 +80,13 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   }, [currentHeight]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.clientY > DRAG_THRESHOLD_Y) return;
     e.preventDefault();
     handleDragStart(e.clientY);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches[0].clientY > DRAG_THRESHOLD_Y) return;
     handleDragStart(e.touches[0].clientY);
   };
 
@@ -94,13 +98,13 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         transition: isDragging.current ? "none" : "all 0.3s ease",
       }}
     >
+      <div className="pullup-handle" />
+
       <div
-        className="pullup-handle"
+        className="pullup-content"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-      />
-
-      <div className="pullup-content">
+      >
         <header className="pullup-header">
           <div className="pullup-info">
             <h2>{restaurant.name}</h2>
