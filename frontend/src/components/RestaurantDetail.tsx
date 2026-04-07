@@ -21,7 +21,7 @@ export default function RestaurantDetail({ restaurant, onBack }: RestaurantDetai
       <div className="menu-list">
         <h3>Menu</h3>
         {restaurant.menu.map((item) => (
-          <MenuItem key={item.id} item={item} restaurantId={restaurant.id} />
+          <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />
         ))}
       </div>
     </div>
