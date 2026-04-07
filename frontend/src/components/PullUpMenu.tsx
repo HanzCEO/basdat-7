@@ -53,22 +53,25 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         }
       });
     } else if (dragState.current.type === "pesan") {
-      const barWidth = 420;
-      const threshold = barWidth * 0.7;
-      if (pesanOffset > threshold) {
-        setIsPesanExpanded(true);
-        setTimeout(() => {
-          onDispatch();
-          setIsPesanExpanded(false);
-          setPesanOffset(0);
-        }, 150);
-      } else {
-        setPesanOffset(0);
-      }
+      setPesanOffset((currentOffset) => {
+        const barWidth = 420;
+        const threshold = barWidth * 0.7;
+        if (currentOffset > threshold) {
+          setIsPesanExpanded(true);
+          setTimeout(() => {
+            onDispatch();
+            setIsPesanExpanded(false);
+            setPesanOffset(0);
+          }, 150);
+          return currentOffset;
+        } else {
+          return 0;
+        }
+      });
     }
     dragState.current.type = "";
     setIsDragging(false);
-  }, [pesanOffset, onClose, onDispatch]);
+  }, [onClose, onDispatch]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -169,7 +172,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
           <button
             className={`btn-dispatch${isPesanExpanded ? " expanded" : ""}`}
             style={{
-              transform: `translateX(-${pesanOffset}px)`,
+              transform: isPesanExpanded ? "translateX(0)" : `translateX(-${pesanOffset}px)`,
               transition: isDragging && dragState.current.type === "pesan" ? "none" : "transform 0.3s ease",
             }}
             onMouseDown={(e) => {
