@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Restaurant } from "../types";
+import { restaurants } from "../data/mockData";
 import MenuItem from "./MenuItem";
 import { useCart } from "../context/CartContext";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface PullUpMenuProps {
   restaurant: Restaurant;
@@ -17,7 +19,11 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   const [isMenuDragging, setIsMenuDragging] = useState(false);
   const [isPesanDragging, setIsPesanDragging] = useState(false);
   const [pesanOffset, setPesanOffset] = useState(0);
-  const { totalItems, totalPrice } = useCart();
+  const { totalItems, totalPrice, items, pendingItem, confirmPendingItem, cancelPendingItem } = useCart();
+
+  const existingRestaurantName = items[0]
+    ? restaurants.find((r) => r.id === items[0].restaurantId)?.name || "Restaurant Lain"
+    : "";
   
   const dragRef = useRef({
     startY: 0,
@@ -152,7 +158,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
 
         <div className="pullup-menu-list">
           {restaurant.menu.map((item) => (
-            <MenuItem key={item.id} item={item} restaurantId={restaurant.id} />
+            <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />
           ))}
         </div>
       </div>
@@ -185,6 +191,14 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={pendingItem !== null}
+        title="Ganti Restaurant?"
+        message={`Keranjang Anda berisi item dari ${existingRestaurantName}. Lanjut untuk menambahkan ${pendingItem?.restaurantName}?`}
+        onConfirm={confirmPendingItem}
+        onCancel={cancelPendingItem}
+      />
     </div>
   );
 }
