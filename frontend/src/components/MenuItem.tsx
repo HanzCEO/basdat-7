@@ -42,7 +42,10 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
           )}
         </h4>
         <p>{item.description}</p>
-        <span className="price">Rp {item.price.toLocaleString()}</span>
+        <div className="menu-item-price-row">
+          <span className="price">Rp {item.price.toLocaleString()}</span>
+          {isRecommended && <span className="best-selling-badge">BEST SELLING</span>}
+        </div>
       </div>
       <div className="menu-item-actions">
         <button
