@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { MenuItem as MenuItemType } from "../types";
 import { useCart } from "../context/CartContext";
 
@@ -9,7 +9,7 @@ interface MenuItemProps {
   isRecommended?: boolean;
 }
 
-export default function MenuItem({ item, restaurantId, restaurantName, isRecommended }: MenuItemProps) {
+const MenuItem = memo(function MenuItem({ item, restaurantId, restaurantName, isRecommended }: MenuItemProps) {
   const { addItem, removeItem, items, setPendingItem } = useCart();
   const [imageUrl, setImageUrl] = useState("");
 
@@ -90,4 +90,6 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
       </div>
     </div>
   );
-}
+});
+
+export default MenuItem;
