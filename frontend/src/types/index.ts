@@ -4,6 +4,7 @@ export interface MenuItem {
   description: string;
   price: number;
   isRecommended?: boolean;
+  isOutOfStock?: boolean;
 }
 
 export interface Restaurant {
