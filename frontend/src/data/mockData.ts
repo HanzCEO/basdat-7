@@ -1,4 +1,11 @@
-import { Restaurant } from "../types";
+import { Restaurant, Driver } from "../types";
+
+export const mockDrivers: Driver[] = [
+  { id: "d1", name: "Bambang", vehicle: "Honda Vario", plateNumber: "B 1234 ABC", rating: 4.8 },
+  { id: "d2", name: "Siti", vehicle: "Yamaha Nmax", plateNumber: "D 5678 XYZ", rating: 4.9 },
+  { id: "d3", name: "Agus", vehicle: "Honda Beat", plateNumber: "F 9012 GH", rating: 4.7 },
+  { id: "d4", name: "Dewi", vehicle: "Yamaha Mio", plateNumber: "B 3456 IJ", rating: 4.6 },
+];
 
 const restaurantTemplates: Omit<Restaurant, "lat" | "lng">[] = [
   {
