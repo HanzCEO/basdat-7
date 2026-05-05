@@ -112,8 +112,14 @@ export function generateNearbyRestaurants(
     const latOffset = (distKm / 111.32) * Math.cos(angle);
     const lngOffset = (distKm / (111.32 * lngScale)) * Math.sin(angle);
 
+    const menu = t.menu.map(item => ({
+      ...item,
+      isOutOfStock: Math.random() < 0.25,
+    }));
+
     return {
       ...t,
+      menu,
       lat: baseLat + latOffset,
       lng: baseLng + lngOffset,
     };
