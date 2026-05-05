@@ -11,7 +11,7 @@ interface PullUpMenuProps {
   onDispatch: () => void;
 }
 
-const COLLAPSED_HEIGHT = 120;
+const COLLAPSED_HEIGHT = 240;
 const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
