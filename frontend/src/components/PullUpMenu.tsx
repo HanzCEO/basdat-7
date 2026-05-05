@@ -126,7 +126,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
 
   const pesanWidth = isPesanDragging ? originalWidthRef.current + pesanOffset : undefined;
 
-  const recommendedItems = restaurant.menu.filter(item => item.isRecommended);
+  const recommendedItems = restaurant.menu.filter(item => item.isRecommended && !item.isOutOfStock);
   const otherItems = restaurant.menu.filter(item => !item.isRecommended);
 
   return (

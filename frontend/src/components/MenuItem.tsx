@@ -26,7 +26,7 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
 
   const classes = [
     'menu-item',
-    isRecommended ? 'menu-item--recommended' : '',
+    isRecommended && !item.isOutOfStock ? 'menu-item--recommended' : '',
     item.isOutOfStock ? 'menu-item--out-of-stock' : '',
   ].filter(Boolean).join(' ');
 
