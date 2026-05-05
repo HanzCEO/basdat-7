@@ -67,15 +67,14 @@ function AppContent() {
         selectedRestaurant={selectedRestaurant}
         onSelectRestaurant={setSelectedRestaurant}
       />
-      {selectedRestaurant && (
-        <PullUpMenu
-          restaurant={selectedRestaurant}
-          onClose={handleClose}
-          onDispatch={handleDispatch}
-          phase={phase}
-          driver={driver}
-        />
-      )}
+      <PullUpMenu
+        restaurant={selectedRestaurant || { id: "", name: "", cuisine: "", rating: 0, menu: [] }}
+        onClose={handleClose}
+        onDispatch={handleDispatch}
+        phase={phase}
+        driver={driver}
+        isVisible={!!selectedRestaurant}
+      />
     </div>
   );
 }

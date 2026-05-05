@@ -10,18 +10,22 @@ interface PullUpMenuProps {
   onDispatch: () => void;
   phase: 'order' | 'delivery';
   driver: Driver | null;
+  isVisible: boolean;
 }
 
-const COLLAPSED_HEIGHT = 240;
-const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
-const FULL_HEIGHT = typeof window !== "undefined" ? window.innerHeight - 50 : 700;
-
-export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, driver }: PullUpMenuProps) {
+export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, driver, isVisible }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
   const [isMenuDragging, setIsMenuDragging] = useState(false);
   const [isPesanDragging, setIsPesanDragging] = useState(false);
   const [pesanOffset, setPesanOffset] = useState(0);
   const { totalItems, totalPrice, items, pendingItem, confirmPendingItem, cancelPendingItem } = useCart();
+  
+  // Reset height when restaurant changes
+  useEffect(() => {
+    setMenuHeight(COLLAPSED_HEIGHT);
+  }, [restaurant.id]);
+
+  if (!isVisible) return null;
 
   const existingRestaurantName = items[0] ? restaurant.name : "";
   
