@@ -162,9 +162,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         <div className="pullup-menu-list">
           {recommendedItems.length > 0 && (
             <>
-              <h3 className="menu-section-title">Recommended</h3>
               {recommendedItems.map(item => (
-                <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />
+                <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} isRecommended />
               ))}
               <div className="menu-section-divider" />
             </>
