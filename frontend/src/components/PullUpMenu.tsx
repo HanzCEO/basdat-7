@@ -152,6 +152,12 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
   const [deliveryStageIndex, setDeliveryStageIndex] = useState(0);
 
   useEffect(() => {
+    if (phase === 'delivery') {
+      setDeliveryStageIndex(0);
+    }
+  }, [phase]);
+
+  useEffect(() => {
     if (phase !== 'delivery') return;
     if (deliveryStageIndex >= deliveryStages.length - 1) return;
     const id = setInterval(() => {
