@@ -83,6 +83,10 @@ body {
   width: 100%;
 }
 
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
 .restaurant-popup {
   padding: 4px 12px;
   font-family: "Quicksand", sans-serif;
