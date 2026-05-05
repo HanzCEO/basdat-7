@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from "react-leaflet";
 import { Restaurant } from "../types";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -16,18 +17,65 @@ const customIcon = new L.Icon({
 interface MapViewProps {
   restaurants: Restaurant[];
   onSelectRestaurant: (restaurant: Restaurant) => void;
+  userLocation: { lat: number; lng: number };
+  selectedRestaurant: Restaurant | null;
 }
 
-export default function MapView({ restaurants, onSelectRestaurant }: MapViewProps) {
+function MapController({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, 14);
+  }, [map, center]);
+  return null;
+}
+
+export default function MapView({
+  restaurants,
+  onSelectRestaurant,
+  userLocation,
+  selectedRestaurant,
+}: MapViewProps) {
+  const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
+
+  useEffect(() => {
+    if (!selectedRestaurant) {
+      setRouteCoords(null);
+      return;
+    }
+
+    const abort = new AbortController();
+    const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${selectedRestaurant.lng},${selectedRestaurant.lat}?geometries=geojson`;
+
+    fetch(url, { signal: abort.signal })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "Ok" && data.routes?.length) {
+          const coords: [number, number][] = data.routes[0].geometry.coordinates.map(
+            ([lng, lat]: number[]) => [lat, lng] as [number, number]
+          );
+          setRouteCoords(coords);
+        }
+      })
+      .catch(() => {});
+
+    return () => abort.abort();
+  }, [selectedRestaurant, userLocation]);
+
   return (
     <MapContainer
-      center={[-6.2088, 106.8456]}
+      center={[userLocation.lat, userLocation.lng]}
       zoom={14}
       className="map-container"
     >
+      <MapController center={[userLocation.lat, userLocation.lng]} />
       <TileLayer
         attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a>'
         url="https://api.maptiler.com/maps/base-v4-light/{z}/{x}/{y}@2x.png?key=7YGFx6IJMbItHm2OZuIY"
+      />
+      <Circle
+        center={[userLocation.lat, userLocation.lng]}
+        radius={30}
+        pathOptions={{ color: "#4285F4", fillColor: "#4285F4", fillOpacity: 0.3 }}
       />
       {restaurants.map((restaurant) => (
         <Marker
@@ -46,6 +94,12 @@ export default function MapView({ restaurants, onSelectRestaurant }: MapViewProp
           </Popup>
         </Marker>
       ))}
+      {routeCoords && (
+        <Polyline
+          positions={routeCoords}
+          pathOptions={{ color: "#4285F4", weight: 4, opacity: 0.8 }}
+        />
+      )}
     </MapContainer>
   );
 }

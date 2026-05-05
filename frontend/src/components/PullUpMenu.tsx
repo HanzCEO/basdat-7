@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Restaurant } from "../types";
-import { restaurants } from "../data/mockData";
 import MenuItem from "./MenuItem";
 import { useCart } from "../context/CartContext";
 import ConfirmDialog from "./ConfirmDialog";
@@ -21,9 +20,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   const [pesanOffset, setPesanOffset] = useState(0);
   const { totalItems, totalPrice, items, pendingItem, confirmPendingItem, cancelPendingItem } = useCart();
 
-  const existingRestaurantName = items[0]
-    ? restaurants.find((r) => r.id === items[0].restaurantId)?.name || "Restaurant Lain"
-    : "";
+  const existingRestaurantName = items[0] ? restaurant.name : "";
   
   const dragRef = useRef({
     startY: 0,
