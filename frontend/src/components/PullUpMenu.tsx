@@ -24,10 +24,10 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
   const [pesanOffset, setPesanOffset] = useState(0);
   const { totalItems, totalPrice, items, pendingItem, confirmPendingItem, cancelPendingItem } = useCart();
   
-  // Reset height when restaurant changes
+  // Reset height when restaurant changes or phase goes to delivery
   useEffect(() => {
     setMenuHeight(COLLAPSED_HEIGHT);
-  }, [restaurant.id]);
+  }, [restaurant.id, phase]);
 
   const existingRestaurantName = items[0] ? restaurant.name : "";
   
