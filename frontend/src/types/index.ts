@@ -3,6 +3,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
+  isRecommended?: boolean;
 }
 
 export interface Restaurant {
