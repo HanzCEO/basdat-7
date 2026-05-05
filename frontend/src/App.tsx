@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
-import { CartProvider } from "./context/CartContext";
-import { Restaurant } from "./types";
-import { generateNearbyRestaurants } from "./data/mockData";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { CartProvider, useCart } from "./context/CartContext";
+import { Restaurant, Driver } from "./types";
+import { generateNearbyRestaurants, mockDrivers } from "./data/mockData";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
 import PullUpMenu from "./components/PullUpMenu";
@@ -14,6 +14,9 @@ function AppContent() {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [phase, setPhase] = useState<'order' | 'delivery'>('order');
+  const [driver, setDriver] = useState<Driver | null>(null);
+  const { clearCart } = useCart();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -40,9 +43,18 @@ function AppContent() {
     );
   }, [searchQuery, restaurants]);
 
-  const handleDispatch = () => {
-    alert("Driver dispatched! (Mock)");
-  };
+  const handleDispatch = useCallback(() => {
+    const randomDriver = mockDrivers[Math.floor(Math.random() * mockDrivers.length)];
+    setDriver(randomDriver);
+    setPhase('delivery');
+    clearCart();
+  }, [clearCart]);
+
+  const handleClose = useCallback(() => {
+    setSelectedRestaurant(null);
+    setPhase('order');
+    setDriver(null);
+  }, []);
 
   return (
     <div className="app">
@@ -58,8 +70,10 @@ function AppContent() {
       {selectedRestaurant && (
         <PullUpMenu
           restaurant={selectedRestaurant}
-          onClose={() => setSelectedRestaurant(null)}
+          onClose={handleClose}
           onDispatch={handleDispatch}
+          phase={phase}
+          driver={driver}
         />
       )}
     </div>
