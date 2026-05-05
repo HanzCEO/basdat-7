@@ -65,6 +65,7 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
         <span className="quantity">{item.isOutOfStock ? 0 : quantity}</span>
         <button
           className="btn-plus"
+          onClick={handleAdd}
           disabled={item.isOutOfStock}
         >
           +
