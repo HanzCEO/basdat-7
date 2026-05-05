@@ -24,7 +24,7 @@ interface MapViewProps {
 function MapController({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
-    map.setView([lat, lng], 14);
+    map.flyTo([lat, lng], 14, { duration: 1.5 });
   }, [map, lat, lng]);
   return null;
 }
@@ -33,7 +33,7 @@ function RouteBounds({ coords }: { coords: [number, number][] | null }) {
   const map = useMap();
   useEffect(() => {
     if (coords && coords.length > 0) {
-      map.fitBounds(coords, { padding: [50, 50] });
+      map.fitBounds(coords, { padding: [50, 50], duration: 1 });
     }
   }, [map, coords]);
   return null;
