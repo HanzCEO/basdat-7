@@ -354,7 +354,15 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
   letter-spacing: 0.3px;
-  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  background: repeating-linear-gradient(
+    -45deg,
+    #ff4757 0,
+    #ff4757 3px,
+    #fff 3px,
+    #fff 6px,
+    #ff9f43 6px,
+    #ff9f43 9px
+  );
 }
 
 .menu-item--recommended {
