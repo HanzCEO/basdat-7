@@ -149,7 +149,22 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
     { key: 'done', label: 'Selesai' },
   ];
 
-  const deliveryStageIndex = 1;
+  const [deliveryStageIndex, setDeliveryStageIndex] = useState(0);
+
+  useEffect(() => {
+    if (phase !== 'delivery') return;
+    if (deliveryStageIndex >= deliveryStages.length - 1) return;
+    const id = setInterval(() => {
+      setDeliveryStageIndex((prev) => {
+        if (prev >= deliveryStages.length - 1) {
+          clearInterval(id);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 3000);
+    return () => clearInterval(id);
+  }, [phase, deliveryStageIndex, deliveryStages.length]);
 
   if (!isVisible) return null;
 
@@ -217,28 +232,18 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
               </div>
             </div>
 
-            <div className="delivery-progress">
-              {deliveryStages.map((stage, i) => {
-                let statusClass = 'progress-step';
-                if (i < deliveryStageIndex) statusClass += ' completed';
-                else if (i === deliveryStageIndex) statusClass += ' active';
-                else statusClass += ' pending';
-                return (
-                  <div key={stage.key} className={statusClass}>
-                    <div className="progress-step-indicator">
-                      {i < deliveryStageIndex ? '\u2713' : i === deliveryStageIndex ? '\u25CF' : '\u25CB'}
-                    </div>
-                    <span className="progress-step-label">{stage.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-
             <div className="progress-bar-track">
               <div
                 className="progress-bar-fill"
                 style={{ width: `${(deliveryStageIndex / (deliveryStages.length - 1)) * 100}%` }}
               />
+            </div>
+
+            <div className="delivery-progress">
+              <div className="progress-step active">
+                <div className="progress-step-indicator">{'\u25CF'}</div>
+                <span className="progress-step-label">{deliveryStages[deliveryStageIndex].label}</span>
+              </div>
             </div>
           </div>
         )}
