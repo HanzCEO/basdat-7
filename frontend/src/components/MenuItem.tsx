@@ -54,22 +54,28 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
           {item.isOutOfStock && <span className="out-of-stock-badge">OUT OF STOCK</span>}
         </div>
       </div>
-      <div className="menu-item-actions">
-        <button
-          className="btn-minus"
-          onClick={() => removeItem(item.id)}
-          disabled={quantity === 0 || item.isOutOfStock}
-        >
-          -
-        </button>
-        <span className="quantity">{item.isOutOfStock ? 0 : quantity}</span>
-        <button
-          className="btn-plus"
-          onClick={handleAdd}
-          disabled={item.isOutOfStock}
-        >
-          +
-        </button>
+      <div className="menu-item-image">
+        <img
+          src={`https://dummyjson.com/image/120x120/4A90D9/ffffff?text=${encodeURIComponent(item.name)}`}
+          alt={item.name}
+        />
+        <div className="menu-item-actions">
+          <button
+            className="btn-minus"
+            onClick={() => removeItem(item.id)}
+            disabled={quantity === 0 || item.isOutOfStock}
+          >
+            -
+          </button>
+          <span className="quantity">{item.isOutOfStock ? 0 : quantity}</span>
+          <button
+            className="btn-plus"
+            onClick={handleAdd}
+            disabled={item.isOutOfStock}
+          >
+            +
+          </button>
+        </div>
       </div>
     </div>
   );
