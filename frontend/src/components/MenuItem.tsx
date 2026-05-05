@@ -30,8 +30,14 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
         <h4>
           {item.name}
           {isRecommended && (
-            <svg className="fire-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+            <svg className="fire-icon" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <defs>
+                <linearGradient id={`flameGrad-${item.id}`} x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stopColor="#e74c3c" />
+                  <stop offset="100%" stopColor="#ff7979" />
+                </linearGradient>
+              </defs>
+              <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" fill={`url(#flameGrad-${item.id})`} stroke="#c0392b" />
             </svg>
           )}
         </h4>
