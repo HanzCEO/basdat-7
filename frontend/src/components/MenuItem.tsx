@@ -45,7 +45,7 @@ const MenuItem = memo(function MenuItem({ item, restaurantId, restaurantName, is
         <h4>
           {item.name}
           {isRecommended && !item.isOutOfStock && (
-            <svg className="fire-icon" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg className="fire-icon" width="16" height="16" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <defs>
                 <linearGradient id={`flameGrad-${item.id}`} x1="0" y1="1" x2="0" y2="0">
                   <stop offset="0%" stopColor="#e74c3c" />
