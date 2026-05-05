@@ -44,7 +44,7 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
         <p>{item.description}</p>
         <div className="menu-item-price-row">
           <span className="price">Rp {item.price.toLocaleString()}</span>
-          {isRecommended && <span className="best-selling-badge">BEST SELLING</span>}
+          {isRecommended && <span className="best-selling-badge">TOP PICKS</span>}
         </div>
       </div>
       <div className="menu-item-actions">
