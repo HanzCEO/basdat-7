@@ -68,7 +68,7 @@ function AppContent() {
         onSelectRestaurant={setSelectedRestaurant}
       />
       <PullUpMenu
-        restaurant={selectedRestaurant || { id: "", name: "", cuisine: "", rating: 0, menu: [] }}
+        restaurant={selectedRestaurant || { id: "", name: "", cuisine: "", rating: 0, lat: 0, lng: 0, menu: [] }}
         onClose={handleClose}
         onDispatch={handleDispatch}
         phase={phase}
