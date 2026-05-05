@@ -188,22 +188,26 @@ body {
       font-weight: 600;
       color: var(--color-blue);
     }
+
+    &-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
   }
 
   &-price-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: auto;
   }
 
   &-image {
     width: 120px;
     height: 120px;
-    position: relative;
     flex-shrink: 0;
     border-radius: 8px;
-    overflow: hidden;
     margin-left: 12px;
 
     img {
@@ -215,16 +219,9 @@ body {
   }
 
   &-actions {
-    position: absolute;
-    bottom: 4px;
-    left: 4px;
-    right: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px;
-    border-radius: 8px;
-    background: var(--color-white);
 
     .btn-minus,
     .btn-plus {

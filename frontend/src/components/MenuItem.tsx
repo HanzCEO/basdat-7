@@ -57,10 +57,29 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
           )}
         </h4>
         <p>{item.description}</p>
-        <div className="menu-item-price-row">
-          <span className="price">Rp {item.price.toLocaleString()}</span>
-          {isRecommended && !item.isOutOfStock && <span className="best-selling-badge">TOP PICKS</span>}
-          {item.isOutOfStock && <span className="out-of-stock-badge">OUT OF STOCK</span>}
+        <div className="menu-item-info-footer">
+          <div className="menu-item-price-row">
+            <span className="price">Rp {item.price.toLocaleString()}</span>
+            {isRecommended && !item.isOutOfStock && <span className="best-selling-badge">TOP PICKS</span>}
+            {item.isOutOfStock && <span className="out-of-stock-badge">OUT OF STOCK</span>}
+          </div>
+          <div className="menu-item-actions">
+            <button
+              className="btn-minus"
+              onClick={() => removeItem(item.id)}
+              disabled={quantity === 0 || item.isOutOfStock}
+            >
+              -
+            </button>
+            <span className="quantity">{item.isOutOfStock ? 0 : quantity}</span>
+            <button
+              className="btn-plus"
+              onClick={handleAdd}
+              disabled={item.isOutOfStock}
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
       <div className="menu-item-image">
@@ -68,23 +87,6 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
           src={imageUrl}
           alt={item.name}
         />
-        <div className="menu-item-actions">
-          <button
-            className="btn-minus"
-            onClick={() => removeItem(item.id)}
-            disabled={quantity === 0 || item.isOutOfStock}
-          >
-            -
-          </button>
-          <span className="quantity">{item.isOutOfStock ? 0 : quantity}</span>
-          <button
-            className="btn-plus"
-            onClick={handleAdd}
-            disabled={item.isOutOfStock}
-          >
-            +
-          </button>
-        </div>
       </div>
     </div>
   );
