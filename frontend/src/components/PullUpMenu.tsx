@@ -126,7 +126,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
 
   const pesanWidth = isPesanDragging ? originalWidthRef.current + pesanOffset : undefined;
 
-  const recommendedItems = restaurant.menu.filter(item => item.isRecommended && !item.isOutOfStock);
+  const recommendedItems = restaurant.menu.filter(item => item.isRecommended);
   const otherItems = restaurant.menu.filter(item => !item.isRecommended);
 
   return (
@@ -160,7 +160,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
           {recommendedItems.length > 0 && (
             <>
               {recommendedItems.map(item => (
-                <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} isRecommended />
+                <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} isRecommended={!item.isOutOfStock} />
               ))}
               <div className="menu-section-divider" />
             </>
