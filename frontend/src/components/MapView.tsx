@@ -46,18 +46,18 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
     const targetZoom = Math.min(map.getBoundsZoom(bounds), 16);
     const targetCenter = bounds.getCenter();
     const startCenter = map.getCenter();
-    const startZoom = map.getZoom();
-    const startTime = performance.now();
 
+    map.setZoom(targetZoom, { animate: false });
+
+    const startTime = performance.now();
     const raf = requestAnimationFrame(function animate(time) {
       const t = Math.min((time - startTime) / 600, 1);
       const e = easeInOut(t);
-      map.setView(
+      map.panTo(
         [
           startCenter.lat + (targetCenter.lat - startCenter.lat) * e,
           startCenter.lng + (targetCenter.lng - startCenter.lng) * e,
         ],
-        startZoom + (targetZoom - startZoom) * e,
         { animate: false }
       );
       if (t < 1) requestAnimationFrame(animate);
