@@ -29,6 +29,16 @@ function MapController({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function RouteBounds({ coords }: { coords: [number, number][] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords && coords.length > 0) {
+      map.fitBounds(coords, { padding: [50, 50] });
+    }
+  }, [map, coords]);
+  return null;
+}
+
 export default function MapView({
   restaurants,
   onSelectRestaurant,
@@ -95,10 +105,13 @@ export default function MapView({
         </Marker>
       ))}
       {routeCoords && (
-        <Polyline
-          positions={routeCoords}
-          pathOptions={{ color: "#4285F4", weight: 4, opacity: 0.8 }}
-        />
+        <>
+          <RouteBounds coords={routeCoords} />
+          <Polyline
+            positions={routeCoords}
+            pathOptions={{ color: "#4285F4", weight: 4, opacity: 0.8 }}
+          />
+        </>
       )}
     </MapContainer>
   );
