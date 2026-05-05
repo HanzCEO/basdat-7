@@ -46,8 +46,8 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
     const targetZoom = Math.min(map.getBoundsZoom(bounds), 16);
     const targetCenter = bounds.getCenter();
     const startCenter = map.getCenter();
-
-    map.setZoom(targetZoom, { animate: false });
+    const startZoom = map.getZoom();
+    let lastZoom = startZoom;
 
     const startTime = performance.now();
     const raf = requestAnimationFrame(function animate(time) {
@@ -60,6 +60,12 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
         ],
         { animate: false }
       );
+      const exactZoom = startZoom + (targetZoom - startZoom) * e;
+      const snapZoom = Math.round(exactZoom);
+      if (snapZoom !== lastZoom) {
+        map.setZoom(snapZoom, { animate: true });
+        lastZoom = snapZoom;
+      }
       if (t < 1) requestAnimationFrame(animate);
     });
 
