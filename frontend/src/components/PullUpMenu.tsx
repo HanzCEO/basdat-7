@@ -29,8 +29,6 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
     setMenuHeight(COLLAPSED_HEIGHT);
   }, [restaurant.id]);
 
-  if (!isVisible) return null;
-
   const existingRestaurantName = items[0] ? restaurant.name : "";
   
   const dragRef = useRef({
@@ -43,6 +41,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
   const pesanButtonRef = useRef<HTMLButtonElement>(null);
   const originalWidthRef = useRef(0);
   const containerWidthRef = useRef(0);
+
+  if (!isVisible) return null;
 
   const handlePointerMove = useCallback((clientY: number, clientX: number) => {
     if (isMenuDragging) {
