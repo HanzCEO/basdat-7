@@ -2,6 +2,9 @@ import { useState, useEffect, memo } from "react";
 import { MenuItem as MenuItemType } from "../types";
 import { useCart } from "../context/CartContext";
 
+const imageCache = new Map<string, string>();
+const pendingFetches = new Set<string>();
+
 interface MenuItemProps {
   item: MenuItemType;
   restaurantId: string;
@@ -14,10 +17,26 @@ const MenuItem = memo(function MenuItem({ item, restaurantId, restaurantName, is
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
+    const id = item.id;
+
+    if (imageCache.has(id)) {
+      setImageUrl(imageCache.get(id)!);
+      return;
+    }
+
+    if (pendingFetches.has(id)) return;
+
+    pendingFetches.add(id);
     fetch("https://foodish-api.com/api/")
       .then((res) => res.json())
-      .then((data) => setImageUrl(data.image))
-      .catch(() => {});
+      .then((data) => {
+        imageCache.set(id, data.image);
+        pendingFetches.delete(id);
+        setImageUrl(data.image);
+      })
+      .catch(() => {
+        pendingFetches.delete(id);
+      });
   }, []);
   const cartItem = items.find((c) => c.item.id === item.id);
   const quantity = cartItem?.quantity || 0;
