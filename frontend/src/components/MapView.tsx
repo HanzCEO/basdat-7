@@ -37,7 +37,10 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
     const bounds = L.latLngBounds(coords);
-    const targetZoom = (map as any).getBoundsZoom(bounds, { padding: [50, 50] }) - 1;
+    const targetZoom = Math.min(
+      (map as any).getBoundsZoom(bounds, { padding: [50, 50] }),
+      16
+    );
     const targetCenter = bounds.getCenter();
     const startCenter = map.getCenter();
     const startZoom = map.getZoom();
