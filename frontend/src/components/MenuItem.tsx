@@ -24,12 +24,18 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
     }
   };
 
+  const classes = [
+    'menu-item',
+    isRecommended ? 'menu-item--recommended' : '',
+    item.isOutOfStock ? 'menu-item--out-of-stock' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`menu-item${isRecommended ? ' menu-item--recommended' : ''}`}>
+    <div className={classes}>
       <div className="menu-item-info">
         <h4>
           {item.name}
-          {isRecommended && (
+          {isRecommended && !item.isOutOfStock && (
             <svg className="fire-icon" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <defs>
                 <linearGradient id={`flameGrad-${item.id}`} x1="0" y1="1" x2="0" y2="0">
@@ -44,19 +50,23 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
         <p>{item.description}</p>
         <div className="menu-item-price-row">
           <span className="price">Rp {item.price.toLocaleString()}</span>
-          {isRecommended && <span className="best-selling-badge">TOP PICKS</span>}
+          {isRecommended && !item.isOutOfStock && <span className="best-selling-badge">TOP PICKS</span>}
+          {item.isOutOfStock && <span className="out-of-stock-badge">OUT OF STOCK</span>}
         </div>
       </div>
       <div className="menu-item-actions">
         <button
           className="btn-minus"
           onClick={() => removeItem(item.id)}
-          disabled={quantity === 0}
+          disabled={quantity === 0 || item.isOutOfStock}
         >
           -
         </button>
-        <span className="quantity">{quantity}</span>
-        <button className="btn-plus" onClick={handleAdd}>
+        <span className="quantity">{item.isOutOfStock ? 0 : quantity}</span>
+        <button
+          className="btn-plus"
+          disabled={item.isOutOfStock}
+        >
           +
         </button>
       </div>
