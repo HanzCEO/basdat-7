@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { MenuItem as MenuItemType } from "../types";
 import { useCart } from "../context/CartContext";
 
@@ -10,6 +11,14 @@ interface MenuItemProps {
 
 export default function MenuItem({ item, restaurantId, restaurantName, isRecommended }: MenuItemProps) {
   const { addItem, removeItem, items, setPendingItem } = useCart();
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    fetch("https://foodish-api.com/api/")
+      .then((res) => res.json())
+      .then((data) => setImageUrl(data.image))
+      .catch(() => {});
+  }, []);
   const cartItem = items.find((c) => c.item.id === item.id);
   const quantity = cartItem?.quantity || 0;
 
@@ -56,7 +65,7 @@ export default function MenuItem({ item, restaurantId, restaurantName, isRecomme
       </div>
       <div className="menu-item-image">
         <img
-          src={`https://dummyjson.com/image/120x120/4A90D9/ffffff?text=${encodeURIComponent(item.name)}`}
+          src={imageUrl}
           alt={item.name}
         />
         <div className="menu-item-actions">
