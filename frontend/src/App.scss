@@ -374,9 +374,9 @@ body {
     position: absolute;
     inset: -3px;
     border-radius: 14px;
-    background: linear-gradient(60deg, #ff4757, #ff6b81, #ff4757, #ff6b81, #ff4757);
-    background-size: 300% 300%;
-    animation: recommendedBorder 4s ease infinite;
+    background: linear-gradient(90deg, #ff4757, #ff9f43, #ff4757);
+    background-size: 200% 100%;
+    animation: badgeSlide 3s linear infinite;
     z-index: -1;
     pointer-events: none;
   }
@@ -401,11 +401,6 @@ body {
       color: #ff4757;
     }
   }
-}
-
-@keyframes recommendedBorder {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .pullup-cart-bar {
