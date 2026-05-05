@@ -42,8 +42,6 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
   const originalWidthRef = useRef(0);
   const containerWidthRef = useRef(0);
 
-  if (!isVisible) return null;
-
   const handlePointerMove = useCallback((clientY: number, clientX: number) => {
     if (isMenuDragging) {
       const delta = dragRef.current.startY - clientY;
@@ -59,33 +57,33 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
     }
   }, [isMenuDragging, isPesanDragging]);
 
-    const handlePointerUp = useCallback(() => {
-      if (isMenuDragging) {
-        setMenuHeight((height) => {
-          if (height < COLLAPSED_HEIGHT + 50) {
-            if (height < COLLAPSED_HEIGHT / 2) {
-              onClose();
-            }
-            return COLLAPSED_HEIGHT;
+  const handlePointerUp = useCallback(() => {
+    if (isMenuDragging) {
+      setMenuHeight((height) => {
+        if (height < COLLAPSED_HEIGHT + 50) {
+          if (height < COLLAPSED_HEIGHT / 2) {
+            onClose();
           }
-          if (height < EXPANDED_HEIGHT + 50) {
-            return EXPANDED_HEIGHT;
-          }
-          return height;
-        });
-        setIsMenuDragging(false);
-      }
-
-      if (isPesanDragging) {
-        if (pesanOffset >= dragRef.current.dispatchThreshold) {
-          onDispatch();
+          return COLLAPSED_HEIGHT;
         }
-        setPesanOffset(0);
-        setIsPesanDragging(false);
-      }
+        if (height < EXPANDED_HEIGHT + 50) {
+          return EXPANDED_HEIGHT;
+        }
+        return height;
+      });
+      setIsMenuDragging(false);
+    }
 
-      dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0, dispatchThreshold: 0 };
-    }, [isMenuDragging, isPesanDragging, pesanOffset, onClose, onDispatch]);
+    if (isPesanDragging) {
+      if (pesanOffset >= dragRef.current.dispatchThreshold) {
+        onDispatch();
+      }
+      setPesanOffset(0);
+      setIsPesanDragging(false);
+    }
+
+    dragRef.current = { startY: 0, startX: 0, heightStart: COLLAPSED_HEIGHT, pesanStartOffset: 0, dispatchThreshold: 0 };
+  }, [isMenuDragging, isPesanDragging, pesanOffset, onClose, onDispatch]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => handlePointerMove(e.clientY, e.clientX);
@@ -152,6 +150,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
   ];
 
   const deliveryStageIndex = 1;
+
+  if (!isVisible) return null;
 
   return (
     <div
