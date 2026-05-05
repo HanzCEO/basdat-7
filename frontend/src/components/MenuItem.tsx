@@ -83,10 +83,12 @@ const MenuItem = memo(function MenuItem({ item, restaurantId, restaurantName, is
         </div>
       </div>
       <div className="menu-item-image">
-        <img
-          src={imageUrl}
-          alt={item.name}
-        />
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={item.name}
+          />
+        )}
       </div>
     </div>
   );
