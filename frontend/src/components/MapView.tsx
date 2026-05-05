@@ -47,25 +47,19 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
     const targetCenter = bounds.getCenter();
     const startCenter = map.getCenter();
     const startZoom = map.getZoom();
-    let lastZoom = startZoom;
 
     const startTime = performance.now();
     const raf = requestAnimationFrame(function animate(time) {
       const t = Math.min((time - startTime) / 600, 1);
       const e = easeInOut(t);
-      map.panTo(
+      map.setView(
         [
           startCenter.lat + (targetCenter.lat - startCenter.lat) * e,
           startCenter.lng + (targetCenter.lng - startCenter.lng) * e,
         ],
+        startZoom + (targetZoom - startZoom) * e,
         { animate: false }
       );
-      const exactZoom = startZoom + (targetZoom - startZoom) * e;
-      const snapZoom = Math.round(exactZoom);
-      if (snapZoom !== lastZoom) {
-        map.setZoom(snapZoom, { animate: true });
-        lastZoom = snapZoom;
-      }
       if (t < 1) requestAnimationFrame(animate);
     });
 
@@ -111,6 +105,7 @@ export default function MapView({
     <MapContainer
       center={[userLocation.lat, userLocation.lng]}
       zoom={14}
+      zoomSnap={0.1}
       className="map-container"
     >
       <MapController lat={userLocation.lat} lng={userLocation.lng} />
