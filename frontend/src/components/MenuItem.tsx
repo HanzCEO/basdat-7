@@ -5,9 +5,10 @@ interface MenuItemProps {
   item: MenuItemType;
   restaurantId: string;
   restaurantName: string;
+  isRecommended?: boolean;
 }
 
-export default function MenuItem({ item, restaurantId, restaurantName }: MenuItemProps) {
+export default function MenuItem({ item, restaurantId, restaurantName, isRecommended }: MenuItemProps) {
   const { addItem, removeItem, items, setPendingItem } = useCart();
   const cartItem = items.find((c) => c.item.id === item.id);
   const quantity = cartItem?.quantity || 0;
@@ -24,7 +25,7 @@ export default function MenuItem({ item, restaurantId, restaurantName }: MenuIte
   };
 
   return (
-    <div className="menu-item">
+    <div className={`menu-item${isRecommended ? ' menu-item--recommended' : ''}`}>
       <div className="menu-item-info">
         <h4>{item.name}</h4>
         <p>{item.description}</p>
