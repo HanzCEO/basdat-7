@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Restaurant } from "../types";
+import { Restaurant, Driver } from "../types";
 import MenuItem from "./MenuItem";
 import { useCart } from "../context/CartContext";
 import ConfirmDialog from "./ConfirmDialog";
@@ -8,13 +8,15 @@ interface PullUpMenuProps {
   restaurant: Restaurant;
   onClose: () => void;
   onDispatch: () => void;
+  phase: 'order' | 'delivery';
+  driver: Driver | null;
 }
 
 const COLLAPSED_HEIGHT = 240;
 const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
 const FULL_HEIGHT = typeof window !== "undefined" ? window.innerHeight - 50 : 700;
 
-export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
+export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, driver }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
   const [isMenuDragging, setIsMenuDragging] = useState(false);
   const [isPesanDragging, setIsPesanDragging] = useState(false);
@@ -133,6 +135,16 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
   const recommendedItems = restaurant.menu.filter(item => item.isRecommended);
   const otherItems = restaurant.menu.filter(item => !item.isRecommended);
 
+  const deliveryStages = [
+    { key: 'received', label: 'Pesanan Diterima' },
+    { key: 'finding', label: 'Mencarikan Driver' },
+    { key: 'to_restaurant', label: 'Driver Menuju Restoran' },
+    { key: 'on_way', label: 'Dalam Perjalanan' },
+    { key: 'done', label: 'Selesai' },
+  ];
+
+  const deliveryStageIndex = 1;
+
   return (
     <div
       className="pullup-menu"
@@ -152,30 +164,79 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
         onMouseDown={(e) => handleMenuPointerDown(e.clientY)}
         onTouchStart={(e) => handleMenuPointerDown(e.touches[0].clientY)}
       >
-        <header className="pullup-header">
-          <div className="pullup-info">
-            <h2>{restaurant.name}</h2>
-            <p>{restaurant.cuisine} • Rating: {restaurant.rating}</p>
-          </div>
-          <button className="btn-close" onClick={onClose}>×</button>
-        </header>
+        {phase === 'order' && (
+          <>
+            <header className="pullup-header">
+              <div className="pullup-info">
+                <h2>{restaurant.name}</h2>
+                <p>{restaurant.cuisine} • Rating: {restaurant.rating}</p>
+              </div>
+              <button className="btn-close" onClick={onClose}>&times;</button>
+            </header>
 
-        <div className="pullup-menu-list">
-          {recommendedItems.length > 0 && (
-            <>
-              {recommendedItems.map(item => (
-                <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} isRecommended={!item.isOutOfStock} />
+            <div className="pullup-menu-list">
+              {recommendedItems.length > 0 && (
+                <>
+                  {recommendedItems.map(item => (
+                    <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} isRecommended={!item.isOutOfStock} />
+                  ))}
+                  <div className="menu-section-divider" />
+                </>
+              )}
+              {otherItems.map(item => (
+                <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />
               ))}
-              <div className="menu-section-divider" />
-            </>
-          )}
-          {otherItems.map(item => (
-            <MenuItem key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />
-          ))}
-        </div>
+            </div>
+          </>
+        )}
+
+        {phase === 'delivery' && driver && (
+          <div className="delivery-content">
+            <header className="pullup-header">
+              <div className="pullup-info">
+                <h2>Pengiriman</h2>
+                <p>{restaurant.name}</p>
+              </div>
+              <button className="btn-close" onClick={onClose}>&times;</button>
+            </header>
+
+            <div className="driver-profile">
+              <div className="driver-avatar">{driver.name.charAt(0)}</div>
+              <div className="driver-details">
+                <span className="driver-name">{driver.name}</span>
+                <span className="driver-vehicle">{driver.vehicle} - {driver.plateNumber}</span>
+                <span className="driver-rating">Rating: {driver.rating}</span>
+              </div>
+            </div>
+
+            <div className="delivery-progress">
+              {deliveryStages.map((stage, i) => {
+                let statusClass = 'progress-step';
+                if (i < deliveryStageIndex) statusClass += ' completed';
+                else if (i === deliveryStageIndex) statusClass += ' active';
+                else statusClass += ' pending';
+                return (
+                  <div key={stage.key} className={statusClass}>
+                    <div className="progress-step-indicator">
+                      {i < deliveryStageIndex ? '\u2713' : i === deliveryStageIndex ? '\u25CF' : '\u25CB'}
+                    </div>
+                    <span className="progress-step-label">{stage.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="progress-bar-track">
+              <div
+                className="progress-bar-fill"
+                style={{ width: `${(deliveryStageIndex / (deliveryStages.length - 1)) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
-      {totalItems > 0 && (
+      {phase === 'order' && totalItems > 0 && (
         <div className="pullup-cart-bar">
           <div className="cart-info">
             <span className="cart-count">{totalItems} items</span>
