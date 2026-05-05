@@ -21,11 +21,11 @@ interface MapViewProps {
   selectedRestaurant: Restaurant | null;
 }
 
-function MapController({ center }: { center: [number, number] }) {
+function MapController({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, 14);
-  }, [map, center]);
+    map.setView([lat, lng], 14);
+  }, [map, lat, lng]);
   return null;
 }
 
@@ -67,7 +67,7 @@ export default function MapView({
       zoom={14}
       className="map-container"
     >
-      <MapController center={[userLocation.lat, userLocation.lng]} />
+      <MapController lat={userLocation.lat} lng={userLocation.lng} />
       <TileLayer
         attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a>'
         url="https://api.maptiler.com/maps/base-v4-light/{z}/{x}/{y}@2x.png?key=7YGFx6IJMbItHm2OZuIY"
