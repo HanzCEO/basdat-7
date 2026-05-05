@@ -354,15 +354,14 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
   letter-spacing: 0.3px;
-  background: repeating-linear-gradient(
-    -45deg,
-    #ff4757 0,
-    #ff4757 3px,
-    #fff 3px,
-    #fff 6px,
-    #ff9f43 6px,
-    #ff9f43 9px
-  );
+  background: linear-gradient(90deg, #ff4757, #ff9f43, #ff4757);
+  background-size: 200% 100%;
+  animation: badgeSlide 3s linear infinite;
+}
+
+@keyframes badgeSlide {
+  from { background-position: 200% 0; }
+  to { background-position: 0 0; }
 }
 
 .menu-item--recommended {
