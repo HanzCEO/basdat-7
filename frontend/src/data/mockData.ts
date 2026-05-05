@@ -1,13 +1,11 @@
 import { Restaurant } from "../types";
 
-export const restaurants: Restaurant[] = [
+const restaurantTemplates: Omit<Restaurant, "lat" | "lng">[] = [
   {
     id: "1",
     name: "Burger Palace",
     cuisine: "American",
     rating: 4.5,
-    lat: -6.2088,
-    lng: 106.8456,
     menu: [
       { id: "m1", name: "Classic Burger", description: "Beef patty with lettuce, tomato, cheese", price: 45000, isRecommended: true },
       { id: "m2", name: "Cheese Burger", description: "Double cheese with special sauce", price: 55000 },
@@ -20,8 +18,6 @@ export const restaurants: Restaurant[] = [
     name: "Pizza Heaven",
     cuisine: "Italian",
     rating: 4.7,
-    lat: -6.2150,
-    lng: 106.8500,
     menu: [
       { id: "m5", name: "Margherita Pizza", description: "Fresh tomatoes, mozzarella, basil", price: 75000, isRecommended: true },
       { id: "m6", name: "Pepperoni Pizza", description: "Spicy pepperoni with cheese", price: 85000 },
@@ -34,8 +30,6 @@ export const restaurants: Restaurant[] = [
     name: "Sushi Master",
     cuisine: "Japanese",
     rating: 4.8,
-    lat: -6.2020,
-    lng: 106.8550,
     menu: [
       { id: "m9", name: "Salmon Sashimi", description: "Fresh raw salmon slices", price: 95000, isRecommended: true },
       { id: "m10", name: "California Roll", description: "Crab, avocado, cucumber roll", price: 65000 },
@@ -48,8 +42,6 @@ export const restaurants: Restaurant[] = [
     name: "Pad Thai House",
     cuisine: "Thai",
     rating: 4.3,
-    lat: -6.2100,
-    lng: 106.8400,
     menu: [
       { id: "m13", name: "Pad Thai", description: "Stir-fried rice noodles with shrimp", price: 55000, isRecommended: true },
       { id: "m14", name: "Green Curry", description: "Thai green curry with chicken", price: 60000 },
@@ -62,8 +54,6 @@ export const restaurants: Restaurant[] = [
     name: "Taco Fiesta",
     cuisine: "Mexican",
     rating: 4.4,
-    lat: -6.2180,
-    lng: 106.8520,
     menu: [
       { id: "m17", name: "Beef Tacos", description: "Three tacos with seasoned beef", price: 48000, isRecommended: true },
       { id: "m18", name: "Chicken Burrito", description: "Grilled chicken with rice and beans", price: 52000 },
@@ -76,8 +66,6 @@ export const restaurants: Restaurant[] = [
     name: "Noodle Bar",
     cuisine: "Chinese",
     rating: 4.2,
-    lat: -6.2050,
-    lng: 106.8380,
     menu: [
       { id: "m21", name: "Chicken Ramen", description: "Japanese style noodle soup", price: 58000, isRecommended: true },
       { id: "m22", name: "Beef Chow Mein", description: "Stir-fried noodles with beef", price: 50000 },
@@ -90,8 +78,6 @@ export const restaurants: Restaurant[] = [
     name: "Indian Spice",
     cuisine: "Indian",
     rating: 4.6,
-    lat: -6.2120,
-    lng: 106.8480,
     menu: [
       { id: "m25", name: "Chicken Tikka Masala", description: "Creamy tomato curry with chicken", price: 65000, isRecommended: true },
       { id: "m26", name: "Butter Naan", description: "Soft bread with butter", price: 15000 },
@@ -104,8 +90,6 @@ export const restaurants: Restaurant[] = [
     name: "Seaside Grill",
     cuisine: "Seafood",
     rating: 4.5,
-    lat: -6.2000,
-    lng: 106.8600,
     menu: [
       { id: "m29", name: "Grilled Salmon", description: "Fresh salmon with herbs", price: 85000, isRecommended: true },
       { id: "m30", name: "Fish and Chips", description: "Beer battered fish with fries", price: 60000 },
@@ -114,3 +98,24 @@ export const restaurants: Restaurant[] = [
     ],
   },
 ];
+
+export function generateNearbyRestaurants(
+  baseLat: number,
+  baseLng: number,
+  count: number = 8
+): Restaurant[] {
+  const lngScale = Math.cos((baseLat * Math.PI) / 180);
+
+  return restaurantTemplates.slice(0, count).map((t, i) => {
+    const angle = ((2 * Math.PI) / count) * i + (Math.random() - 0.5) * 0.8;
+    const distKm = 0.3 + Math.random() * 1.0;
+    const latOffset = (distKm / 111.32) * Math.cos(angle);
+    const lngOffset = (distKm / (111.32 * lngScale)) * Math.sin(angle);
+
+    return {
+      ...t,
+      lat: baseLat + latOffset,
+      lng: baseLng + lngOffset,
+    };
+  });
+}
