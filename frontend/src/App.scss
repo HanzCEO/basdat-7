@@ -222,6 +222,7 @@ body {
   &-actions {
     display: flex;
     align-items: center;
+    gap: 12px;
 
     .btn-minus,
     .btn-plus {
