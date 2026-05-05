@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback, useMemo, ReactNode } from "react";
 import { CartItem, MenuItem } from "../types";
 
 interface PendingItem {
@@ -99,23 +99,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(state.items));
   }, [state.items]);
 
-  const addItem = (item: MenuItem, restaurantId: string) => {
+  const addItem = useCallback((item: MenuItem, restaurantId: string) => {
     dispatch({ type: "ADD_ITEM", payload: { item, restaurantId } });
-  };
+  }, []);
 
-  const removeItem = (itemId: string) => {
+  const removeItem = useCallback((itemId: string) => {
     dispatch({ type: "REMOVE_ITEM", payload: itemId });
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     dispatch({ type: "CLEAR_CART" });
-  };
+  }, []);
 
-  const setPendingItem = (item: MenuItem, restaurantId: string, restaurantName: string) => {
+  const setPendingItem = useCallback((item: MenuItem, restaurantId: string, restaurantName: string) => {
     dispatch({ type: "SET_PENDING_ITEM", payload: { item, restaurantId, restaurantName } });
-  };
+  }, []);
 
-  const confirmPendingItem = () => {
+  const confirmPendingItem = useCallback(() => {
     if (state.pendingItem) {
       dispatch({ type: "CLEAR_CART" });
       dispatch({
@@ -127,30 +127,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
       dispatch({ type: "CLEAR_PENDING" });
     }
-  };
+  }, [state.pendingItem]);
 
-  const cancelPendingItem = () => {
+  const cancelPendingItem = useCallback(() => {
     dispatch({ type: "CLEAR_PENDING" });
-  };
+  }, []);
 
   const totalItems = state.items.reduce((sum, c) => sum + c.quantity, 0);
   const totalPrice = state.items.reduce((sum, c) => sum + c.item.price * c.quantity, 0);
 
+  const value = useMemo(() => ({
+    items: state.items,
+    pendingItem: state.pendingItem,
+    addItem,
+    removeItem,
+    clearCart,
+    setPendingItem,
+    confirmPendingItem,
+    cancelPendingItem,
+    totalItems,
+    totalPrice,
+  }), [state.items, state.pendingItem, addItem, removeItem, clearCart, setPendingItem, confirmPendingItem, cancelPendingItem, totalItems, totalPrice]);
+
   return (
-    <CartContext.Provider
-      value={{
-        items: state.items,
-        pendingItem: state.pendingItem,
-        addItem,
-        removeItem,
-        clearCart,
-        setPendingItem,
-        confirmPendingItem,
-        cancelPendingItem,
-        totalItems,
-        totalPrice,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
