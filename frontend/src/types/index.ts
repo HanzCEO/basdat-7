@@ -27,3 +27,11 @@ export interface CartState {
   items: CartItem[];
   restaurantId: string | null;
 }
+
+export interface Driver {
+  id: string;
+  name: string;
+  vehicle: string;
+  plateNumber: string;
+  rating: number;
+}
