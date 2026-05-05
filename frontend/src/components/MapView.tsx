@@ -29,10 +29,35 @@ function MapController({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function easeInOut(t: number) {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
 function RouteBounds({ coords }: { coords: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
-    map.flyToBounds(coords, { padding: [50, 50], duration: 0.6 });
+    const bounds = L.latLngBounds(coords);
+    const targetZoom = (map as any).getBoundsZoom(bounds, { padding: [50, 50] });
+    const targetCenter = bounds.getCenter();
+    const startCenter = map.getCenter();
+    const startZoom = map.getZoom();
+    const startTime = performance.now();
+
+    const raf = requestAnimationFrame(function animate(time) {
+      const t = Math.min((time - startTime) / 600, 1);
+      const e = easeInOut(t);
+      map.setView(
+        [
+          startCenter.lat + (targetCenter.lat - startCenter.lat) * e,
+          startCenter.lng + (targetCenter.lng - startCenter.lng) * e,
+        ],
+        startZoom + (targetZoom - startZoom) * e,
+        { animate: false }
+      );
+      if (t < 1) requestAnimationFrame(animate);
+    });
+
+    return () => cancelAnimationFrame(raf);
   }, [map, coords]);
   return null;
 }
