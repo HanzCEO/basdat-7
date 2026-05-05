@@ -12,6 +12,7 @@ interface PullUpMenuProps {
 
 const COLLAPSED_HEIGHT = 240;
 const EXPANDED_HEIGHT = typeof window !== "undefined" ? window.innerHeight * 0.8 : 500;
+const FULL_HEIGHT = typeof window !== "undefined" ? window.innerHeight - 50 : 700;
 
 export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
@@ -37,7 +38,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
     if (isMenuDragging) {
       const delta = dragRef.current.startY - clientY;
       const newHeight = dragRef.current.heightStart + delta;
-      const clamped = Math.max(COLLAPSED_HEIGHT, Math.min(EXPANDED_HEIGHT, newHeight));
+      const clamped = Math.max(COLLAPSED_HEIGHT, Math.min(FULL_HEIGHT, newHeight));
       setMenuHeight(clamped);
     }
 
@@ -57,7 +58,10 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch }: PullUpMe
           }
           return COLLAPSED_HEIGHT;
         }
-        return EXPANDED_HEIGHT;
+        if (current < EXPANDED_HEIGHT + 50) {
+          return EXPANDED_HEIGHT;
+        }
+        return current;
       });
       setIsMenuDragging(false);
     }
