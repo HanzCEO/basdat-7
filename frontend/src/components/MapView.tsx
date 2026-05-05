@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from "react-leaflet";
 import { Restaurant } from "../types";
 import "leaflet/dist/leaflet.css";
@@ -29,15 +29,10 @@ function MapController({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-function RouteBounds({ coords, onAnimated }: { coords: [number, number][]; onAnimated: () => void }) {
+function RouteBounds({ coords }: { coords: [number, number][] }) {
   const map = useMap();
-  const onAnimatedRef = useRef(onAnimated);
-  onAnimatedRef.current = onAnimated;
-
   useEffect(() => {
     map.fitBounds(coords, { padding: [50, 50], duration: 1 });
-    const raf = requestAnimationFrame(() => onAnimatedRef.current());
-    return () => cancelAnimationFrame(raf);
   }, [map, coords]);
   return null;
 }
@@ -49,16 +44,14 @@ export default function MapView({
   selectedRestaurant,
 }: MapViewProps) {
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
-  const [routeVisible, setRouteVisible] = useState(false);
 
   useEffect(() => {
     if (!selectedRestaurant) {
       setRouteCoords(null);
-      setRouteVisible(false);
       return;
     }
 
-    setRouteVisible(false);
+    setRouteCoords(null);
     const abort = new AbortController();
     const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${selectedRestaurant.lng},${selectedRestaurant.lat}?geometries=geojson`;
 
@@ -112,13 +105,11 @@ export default function MapView({
       ))}
       {routeCoords && (
         <>
-          <RouteBounds coords={routeCoords} onAnimated={() => setRouteVisible(true)} />
-          {routeVisible && (
-            <Polyline
-              positions={routeCoords}
-              pathOptions={{ color: "#4285F4", weight: 4, opacity: 0.8 }}
-            />
-          )}
+          <RouteBounds coords={routeCoords} />
+          <Polyline
+            positions={routeCoords}
+            pathOptions={{ color: "#4285F4", weight: 4, opacity: 0.8 }}
+          />
         </>
       )}
     </MapContainer>
