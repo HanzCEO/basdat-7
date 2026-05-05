@@ -24,7 +24,7 @@ interface MapViewProps {
 function MapController({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo([lat, lng], 14, { duration: 1.5 });
+    map.flyTo([lat, lng], 14, { animate: true, duration: 1.5 });
   }, [map, lat, lng]);
   return null;
 }
@@ -39,7 +39,7 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
       [raw.getSouth() - padLat, raw.getWest() - padLng],
       [raw.getNorth() + padLat, raw.getEast() + padLng]
     );
-    map.fitBounds(bounds, { maxZoom: 16 });
+    map.flyToBounds(bounds, { animate: true, maxZoom: 16, duration: 0.6 });
   }, [map, coords]);
   return null;
 }
