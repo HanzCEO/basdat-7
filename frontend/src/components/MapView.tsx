@@ -19,6 +19,7 @@ interface MapViewProps {
   onSelectRestaurant: (restaurant: Restaurant) => void;
   userLocation: { lat: number; lng: number };
   selectedRestaurant: Restaurant | null;
+  phase: 'order' | 'delivery';
 }
 
 function MapController({ lat, lng }: { lat: number; lng: number }) {
@@ -49,6 +50,7 @@ export default function MapView({
   onSelectRestaurant,
   userLocation,
   selectedRestaurant,
+  phase,
 }: MapViewProps) {
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
 
@@ -94,7 +96,10 @@ export default function MapView({
         radius={30}
         pathOptions={{ color: "#4285F4", fillColor: "#4285F4", fillOpacity: 0.3 }}
       />
-      {restaurants.map((restaurant) => (
+      {(phase === 'delivery' && selectedRestaurant
+        ? restaurants.filter((r) => r.id === selectedRestaurant.id)
+        : restaurants
+      ).map((restaurant) => (
         <Marker
           key={restaurant.id}
           position={[restaurant.lat, restaurant.lng]}
