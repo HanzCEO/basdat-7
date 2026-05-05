@@ -36,11 +36,14 @@ function easeInOut(t: number) {
 function RouteBounds({ coords }: { coords: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
-    const bounds = L.latLngBounds(coords);
-    const targetZoom = Math.min(
-      (map as any).getBoundsZoom(bounds, { padding: [50, 50] }),
-      16
+    const raw = L.latLngBounds(coords);
+    const padLat = (raw.getNorth() - raw.getSouth()) * 0.2 || 0.002;
+    const padLng = (raw.getEast() - raw.getWest()) * 0.2 || 0.002;
+    const bounds = L.latLngBounds(
+      [raw.getSouth() - padLat, raw.getWest() - padLng],
+      [raw.getNorth() + padLat, raw.getEast() + padLng]
     );
+    const targetZoom = Math.min(map.getBoundsZoom(bounds), 16);
     const targetCenter = bounds.getCenter();
     const startCenter = map.getCenter();
     const startZoom = map.getZoom();
