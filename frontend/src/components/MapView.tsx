@@ -32,7 +32,7 @@ function MapController({ lat, lng }: { lat: number; lng: number }) {
 function RouteBounds({ coords }: { coords: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
-    map.flyToBounds(coords, { padding: [50, 50], duration: 1.2 });
+    map.flyToBounds(coords, { padding: [50, 50], duration: 0.6 });
   }, [map, coords]);
   return null;
 }
