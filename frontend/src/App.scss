@@ -231,6 +231,7 @@ body {
     .btn-plus {
       width: 36px;
       height: 36px;
+      aspect-ratio: 1;
       border-radius: 50%;
       border: 2px solid var(--color-blue);
       background: var(--color-white);
