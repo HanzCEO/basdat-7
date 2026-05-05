@@ -9,7 +9,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2088,
     lng: 106.8456,
     menu: [
-      { id: "m1", name: "Classic Burger", description: "Beef patty with lettuce, tomato, cheese", price: 45000 },
+      { id: "m1", name: "Classic Burger", description: "Beef patty with lettuce, tomato, cheese", price: 45000, isRecommended: true },
       { id: "m2", name: "Cheese Burger", description: "Double cheese with special sauce", price: 55000 },
       { id: "m3", name: "Fries", description: "Crispy golden fries", price: 20000 },
       { id: "m4", name: "Soda", description: "Refreshing cola drink", price: 12000 },
@@ -23,7 +23,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2150,
     lng: 106.8500,
     menu: [
-      { id: "m5", name: "Margherita Pizza", description: "Fresh tomatoes, mozzarella, basil", price: 75000 },
+      { id: "m5", name: "Margherita Pizza", description: "Fresh tomatoes, mozzarella, basil", price: 75000, isRecommended: true },
       { id: "m6", name: "Pepperoni Pizza", description: "Spicy pepperoni with cheese", price: 85000 },
       { id: "m7", name: "Garlic Bread", description: "Toasted with garlic butter", price: 25000 },
       { id: "m8", name: "Iced Tea", description: "Freshly brewed iced tea", price: 15000 },
@@ -37,7 +37,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2020,
     lng: 106.8550,
     menu: [
-      { id: "m9", name: "Salmon Sashimi", description: "Fresh raw salmon slices", price: 95000 },
+      { id: "m9", name: "Salmon Sashimi", description: "Fresh raw salmon slices", price: 95000, isRecommended: true },
       { id: "m10", name: "California Roll", description: "Crab, avocado, cucumber roll", price: 65000 },
       { id: "m11", name: "Miso Soup", description: "Traditional Japanese soup", price: 18000 },
       { id: "m12", name: "Green Tea", description: "Hot Japanese green tea", price: 10000 },
@@ -51,7 +51,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2100,
     lng: 106.8400,
     menu: [
-      { id: "m13", name: "Pad Thai", description: "Stir-fried rice noodles with shrimp", price: 55000 },
+      { id: "m13", name: "Pad Thai", description: "Stir-fried rice noodles with shrimp", price: 55000, isRecommended: true },
       { id: "m14", name: "Green Curry", description: "Thai green curry with chicken", price: 60000 },
       { id: "m15", name: "Spring Rolls", description: "Crispy vegetable rolls", price: 22000 },
       { id: "m16", name: "Thai Ice Tea", description: "Sweet orange tea with milk", price: 18000 },
@@ -65,7 +65,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2180,
     lng: 106.8520,
     menu: [
-      { id: "m17", name: "Beef Tacos", description: "Three tacos with seasoned beef", price: 48000 },
+      { id: "m17", name: "Beef Tacos", description: "Three tacos with seasoned beef", price: 48000, isRecommended: true },
       { id: "m18", name: "Chicken Burrito", description: "Grilled chicken with rice and beans", price: 52000 },
       { id: "m19", name: "Nachos", description: "Tortilla chips with cheese dip", price: 35000 },
       { id: "m20", name: "Lime Margarita", description: "Classic lime cocktail", price: 40000 },
@@ -79,7 +79,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2050,
     lng: 106.8380,
     menu: [
-      { id: "m21", name: "Chicken Ramen", description: "Japanese style noodle soup", price: 58000 },
+      { id: "m21", name: "Chicken Ramen", description: "Japanese style noodle soup", price: 58000, isRecommended: true },
       { id: "m22", name: "Beef Chow Mein", description: "Stir-fried noodles with beef", price: 50000 },
       { id: "m23", name: "Dumplings", description: "Steamed pork dumplings", price: 30000 },
       { id: "m24", name: "Soy Milk", description: "Fresh hot soy milk", price: 12000 },
@@ -93,7 +93,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2120,
     lng: 106.8480,
     menu: [
-      { id: "m25", name: "Chicken Tikka Masala", description: "Creamy tomato curry with chicken", price: 65000 },
+      { id: "m25", name: "Chicken Tikka Masala", description: "Creamy tomato curry with chicken", price: 65000, isRecommended: true },
       { id: "m26", name: "Butter Naan", description: "Soft bread with butter", price: 15000 },
       { id: "m27", name: "Samosa", description: "Crispy potato pastry", price: 20000 },
       { id: "m28", name: "Mango Lassi", description: "Sweet yogurt mango drink", price: 22000 },
@@ -107,7 +107,7 @@ export const restaurants: Restaurant[] = [
     lat: -6.2000,
     lng: 106.8600,
     menu: [
-      { id: "m29", name: "Grilled Salmon", description: "Fresh salmon with herbs", price: 85000 },
+      { id: "m29", name: "Grilled Salmon", description: "Fresh salmon with herbs", price: 85000, isRecommended: true },
       { id: "m30", name: "Fish and Chips", description: "Beer battered fish with fries", price: 60000 },
       { id: "m31", name: "Clam Chowder", description: "Creamy seafood soup", price: 35000 },
       { id: "m32", name: "Lemonade", description: "Fresh squeezed lemonade", price: 15000 },
