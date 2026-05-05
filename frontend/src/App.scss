@@ -366,6 +366,12 @@ body {
   overflow-y: auto;
   padding: 16px 16px 16px;
   min-height: 100vh;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .menu-section-divider {
