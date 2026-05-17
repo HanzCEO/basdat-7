@@ -21,6 +21,7 @@ export interface CartItem {
   item: MenuItem;
   quantity: number;
   restaurantId: string;
+  restaurantName: string;
 }
 
 export interface CartState {
