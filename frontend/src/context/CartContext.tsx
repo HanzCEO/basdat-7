@@ -10,7 +10,7 @@ interface PendingItem {
 interface CartContextType {
   items: CartItem[];
   pendingItem: PendingItem | null;
-  addItem: (item: MenuItem, restaurantId: string) => void;
+  addItem: (item: MenuItem, restaurantId: string, restaurantName: string) => void;
   removeItem: (itemId: string) => void;
   clearCart: () => void;
   setPendingItem: (item: MenuItem, restaurantId: string, restaurantName: string) => void;
@@ -21,7 +21,7 @@ interface CartContextType {
 }
 
 type CartAction =
-  | { type: "ADD_ITEM"; payload: { item: MenuItem; restaurantId: string } }
+  | { type: "ADD_ITEM"; payload: { item: MenuItem; restaurantId: string; restaurantName: string } }
   | { type: "REMOVE_ITEM"; payload: string }
   | { type: "CLEAR_CART" }
   | { type: "LOAD_CART"; payload: CartItem[] }
@@ -53,7 +53,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         ...state,
         items: [
           ...state.items,
-          { item: action.payload.item, quantity: 1, restaurantId: action.payload.restaurantId },
+          { item: action.payload.item, quantity: 1, restaurantId: action.payload.restaurantId, restaurantName: action.payload.restaurantName },
         ],
       };
     }
@@ -75,7 +75,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "CLEAR_CART":
       return { ...state, items: [] };
     case "LOAD_CART":
-      return { ...state, items: action.payload };
+      return { ...state, items: action.payload.map((c) => ({ ...c, restaurantName: c.restaurantName ?? "" })) };
     case "SET_PENDING_ITEM":
       return { ...state, pendingItem: action.payload };
     case "CLEAR_PENDING":
@@ -99,8 +99,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(state.items));
   }, [state.items]);
 
-  const addItem = useCallback((item: MenuItem, restaurantId: string) => {
-    dispatch({ type: "ADD_ITEM", payload: { item, restaurantId } });
+  const addItem = useCallback((item: MenuItem, restaurantId: string, restaurantName: string) => {
+    dispatch({ type: "ADD_ITEM", payload: { item, restaurantId, restaurantName } });
   }, []);
 
   const removeItem = useCallback((itemId: string) => {
@@ -123,6 +123,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         payload: {
           item: state.pendingItem.item,
           restaurantId: state.pendingItem.restaurantId,
+          restaurantName: state.pendingItem.restaurantName,
         },
       });
       dispatch({ type: "CLEAR_PENDING" });
