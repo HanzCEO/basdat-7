@@ -48,7 +48,7 @@ const MenuItem = memo(function MenuItem({ item, restaurantId, restaurantName, is
     if (isDifferentRestaurant) {
       setPendingItem(item, restaurantId, restaurantName);
     } else {
-      addItem(item, restaurantId);
+      addItem(item, restaurantId, restaurantName);
     }
   };
 
