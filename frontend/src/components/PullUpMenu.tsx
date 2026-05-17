@@ -29,7 +29,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
     setMenuHeight(COLLAPSED_HEIGHT);
   }, [restaurant.id, phase]);
 
-  const existingRestaurantName = items[0] ? restaurant.name : "";
+  const existingRestaurantName = items[0]?.restaurantName ?? "";
   
   const dragRef = useRef({
     startY: 0,
