@@ -281,6 +281,15 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
                 );
               })}
             </div>
+            {currentStage === 'selesai' && (
+              <div className="delivery-complete">
+                <div className="delivery-complete-icon">&#10003;</div>
+                <p className="delivery-complete-text">Pesanan Selesai</p>
+                <button className="btn-back" onClick={onClose}>
+                  Kembali
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
