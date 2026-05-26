@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { CartProvider, useCart } from "./context/CartContext";
 import { Restaurant, Driver } from "./types";
-import { getRestaurants, getPelanggan, createPesanan, assignDriver, startPengiriman } from "./services/api";
+import { getRestaurants, getPelanggan, createPesanan, assignDriver, startPengiriman, updateDeliveryStatus } from "./services/api";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
 import PullUpMenu from "./components/PullUpMenu";
@@ -21,6 +21,7 @@ function AppContent() {
   const [pelangganAlamat, setPelangganAlamat] = useState("");
   const [pesananId, setPesananId] = useState<number | null>(null);
   const [isDispatching, setIsDispatching] = useState(false);
+  const [driverPosition, setDriverPosition] = useState<{ lat: number; lng: number } | null>(null);
   const { items, clearCart } = useCart();
   const dispatchLock = useRef(false);
 
@@ -99,7 +100,49 @@ function AppContent() {
     setPhase('order');
     setDriver(null);
     setPesananId(null);
+    setDriverPosition(null);
   }, []);
+
+  useEffect(() => {
+    if (phase !== 'delivery' || !pesananId || !selectedRestaurant) return;
+
+    setDriverPosition({ lat: selectedRestaurant.lat, lng: selectedRestaurant.lng });
+
+    const MENUJU_DURATION = 5000;
+    const PENGIRIMAN_DURATION = 15000;
+    const startTime = Date.now();
+    let advancedToPengiriman = false;
+    let advancedToSelesai = false;
+
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+
+      if (elapsed < MENUJU_DURATION) {
+        setDriverPosition({ lat: selectedRestaurant.lat, lng: selectedRestaurant.lng });
+      } else if (elapsed < MENUJU_DURATION + PENGIRIMAN_DURATION) {
+        if (!advancedToPengiriman) {
+          advancedToPengiriman = true;
+          updateDeliveryStatus(pesananId, 'dalam_pengiriman').catch(() => {});
+        }
+        const p = (elapsed - MENUJU_DURATION) / PENGIRIMAN_DURATION;
+        setDriverPosition({
+          lat: selectedRestaurant.lat + (location.lat - selectedRestaurant.lat) * p,
+          lng: selectedRestaurant.lng + (location.lng - selectedRestaurant.lng) * p,
+        });
+      } else {
+        if (!advancedToSelesai) {
+          advancedToSelesai = true;
+          updateDeliveryStatus(pesananId, 'selesai').catch(() => {});
+        }
+        setDriverPosition({ lat: location.lat, lng: location.lng });
+      }
+    };
+
+    tick();
+    const intervalId = setInterval(tick, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [phase, pesananId, selectedRestaurant, location]);
 
   return (
     <div className="app">
@@ -112,6 +155,7 @@ function AppContent() {
         selectedRestaurant={selectedRestaurant}
         onSelectRestaurant={setSelectedRestaurant}
         phase={phase}
+        driverPosition={driverPosition}
       />
       <PullUpMenu
         restaurant={selectedRestaurant || { id: "", name: "", cuisine: "", rating: 0, lat: 0, lng: 0, menu: [] }}

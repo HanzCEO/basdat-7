@@ -60,9 +60,9 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
           setTrackingDriver({
             id: String(p.driver_id || ""),
             name: p.driver_nama || "",
-            vehicle: "",
-            plateNumber: "",
-            rating: 0,
+            vehicle: p.driver_kendaraan || "",
+            plateNumber: p.driver_plat || "",
+            rating: Number(p.driver_rating) || 0,
           });
           setCurrentStage(p.status_pengiriman || "menunggu_konfirmasi");
         } else {
