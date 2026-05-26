@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Star } from "lucide-react";
 import { getAdminDrivers } from "../services/api";
 import { AdminDriverSummary } from "../types";
 
@@ -78,7 +79,7 @@ export default function AdminDrivers() {
                 <h4>{d.nama}</h4>
                 <p>{d.jenis_kendaraan} &middot; {d.no_plat}</p>
                 <div className="admin-driver-meta">
-                  <span>&#9733; {d.rating.toFixed(2)}</span>
+                  <span><Star size={14} className="star-icon" /> {d.rating.toFixed(2)}</span>
                   <span>{d.total_pengiriman} deliveries</span>
                   <span>{d.total_distance.toFixed(1)} km</span>
                   <span>
@@ -116,7 +117,7 @@ export default function AdminDrivers() {
                     </td>
                     <td>{d.jenis_kendaraan}</td>
                     <td>{d.no_plat}</td>
-                    <td>&#9733; {d.rating.toFixed(2)}</td>
+                    <td><Star size={14} className="star-icon" /> {d.rating.toFixed(2)}</td>
                     <td>{d.total_pengiriman}</td>
                     <td>{d.total_distance.toFixed(1)} km</td>
                     <td>

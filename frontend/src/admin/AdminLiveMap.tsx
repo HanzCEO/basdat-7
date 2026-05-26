@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { Star } from "lucide-react";
 import { getDriverLocations, getRestaurants } from "../services/api";
 import { DriverLocation, Restaurant } from "../types";
 import L from "leaflet";
@@ -115,7 +116,7 @@ export default function AdminLiveMap() {
                   <div style={{ fontFamily: "Quicksand, sans-serif", padding: 4 }}>
                     <strong style={{ fontSize: 14 }}>{r.name}</strong>
                     <br />
-                    &#9733; {r.rating}
+                    <Star size={14} className="star-icon" /> {r.rating}
                     <br />
                     <span style={{ fontSize: 12, color: "#6b7280" }}>
                       {r.menu.length} menu items
@@ -136,7 +137,7 @@ export default function AdminLiveMap() {
                     <br />
                     {loc.jenis_kendaraan} &middot; {loc.no_plat}
                     <br />
-                    &#9733; {loc.rating.toFixed(2)}
+                    <Star size={14} className="star-icon" /> {loc.rating.toFixed(2)}
                     <br />
                     <span style={{ fontSize: 12, color: "#6b7280" }}>
                       {loc.status_pengiriman === "menuju_restoran"

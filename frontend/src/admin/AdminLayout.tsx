@@ -1,12 +1,15 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard, ClipboardList, Users, Map, FileText, ArrowLeft,
+} from "lucide-react";
 import "./Admin.scss";
 
 const navItems = [
-  { to: "/admin", label: "Dashboard", icon: "D" },
-  { to: "/admin/pesanan", label: "Pesanan", icon: "P" },
-  { to: "/admin/drivers", label: "Drivers", icon: "D" },
-  { to: "/admin/map", label: "Live Map", icon: "M" },
-  { to: "/admin/reports", label: "Reports", icon: "R" },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/pesanan", label: "Pesanan", icon: ClipboardList },
+  { to: "/admin/drivers", label: "Drivers", icon: Users },
+  { to: "/admin/map", label: "Live Map", icon: Map },
+  { to: "/admin/reports", label: "Reports", icon: FileText },
 ];
 
 export default function AdminLayout() {
@@ -31,14 +34,14 @@ export default function AdminLayout() {
               end={item.to === "/admin"}
               className={({ isActive }) => `admin-nav-link${isActive ? " active" : ""}`}
             >
-              <span className="nav-icon">{item.icon}</span>
+              <item.icon size={18} />
               {item.label}
             </NavLink>
           ))}
         </nav>
         <div className="admin-sidebar-footer">
           <NavLink to="/" className="admin-nav-link">
-            <span className="nav-icon">C</span>
+            <ArrowLeft size={18} />
             Customer App
           </NavLink>
         </div>

@@ -41,11 +41,23 @@ export interface Driver {
 
 export interface AdminStats {
   total_drivers: number;
+  total_restaurants: number;
+  total_customers: number;
+  available_drivers: number;
+  busy_drivers: number;
   active_deliveries: number;
   avg_rating: number;
   total_deliveries: number;
   deliveries_today: number;
+  total_orders: number;
+  orders_today: number;
+  total_revenue: number;
+  revenue_today: number;
+  avg_delivery_time: number;
+  cancellation_rate: number;
+  orders_by_status: { status: string; count: number }[];
   monthly_trend: { bulan: string; total: number }[];
+  monthly_revenue: { bulan: string; revenue: number }[];
 }
 
 export interface AdminDriverSummary {

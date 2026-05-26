@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Star } from "lucide-react";
 import { getAdminOrderDetail } from "../services/api";
 import { OrderDetail } from "../types";
 
@@ -107,7 +108,7 @@ export default function AdminPesananDetail() {
             </div>
             <div className="admin-info-item">
               <label>Rating</label>
-              <span>&#9733; {p.restoran_rating}</span>
+              <span><Star size={14} className="star-icon" /> {p.restoran_rating}</span>
             </div>
             <div className="admin-info-item">
               <label>Phone</label>
@@ -134,7 +135,7 @@ export default function AdminPesananDetail() {
               </div>
               <div className="admin-info-item">
                 <label>Rating</label>
-                <span>&#9733; {d.rating}</span>
+                <span><Star size={14} className="star-icon" /> {d.rating}</span>
               </div>
               <div className="admin-info-item">
                 <label>Vehicle</label>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Star } from "lucide-react";
 import { getAdminDrivers, getDriverPerformance, getDriverReportUrl } from "../services/api";
 import { AdminDriverSummary, DriverPerformance } from "../types";
 import {
@@ -54,7 +55,7 @@ export default function AdminReports() {
             <option value="">Select a driver...</option>
             {drivers.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.nama} &middot; {d.jenis_kendaraan} &middot; &#9733; {d.rating.toFixed(2)}
+                {d.nama} &middot; {d.jenis_kendaraan} &middot; <Star size={14} className="star-icon" /> {d.rating.toFixed(2)}
               </option>
             ))}
           </select>
