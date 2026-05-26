@@ -10,6 +10,7 @@ export default function AdminDrivers() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     setLoading(true);
@@ -40,13 +41,29 @@ export default function AdminDrivers() {
             </button>
           ))}
         </div>
+        <div className="admin-view-toggle">
+          <button
+            className={`admin-view-toggle-btn${viewMode === "grid" ? " active" : ""}`}
+            onClick={() => setViewMode("grid")}
+            title="Grid view"
+          >
+            Grid
+          </button>
+          <button
+            className={`admin-view-toggle-btn${viewMode === "list" ? " active" : ""}`}
+            onClick={() => setViewMode("list")}
+            title="List view"
+          >
+            List
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className="admin-loading">Loading drivers...</div>
       ) : drivers.length === 0 ? (
         <div className="admin-loading">No drivers found.</div>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="admin-driver-cards">
           {drivers.map((d) => (
             <Link
@@ -73,6 +90,45 @@ export default function AdminDrivers() {
               </div>
             </Link>
           ))}
+        </div>
+      ) : (
+        <div className="admin-card">
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Vehicle</th>
+                  <th>Plate</th>
+                  <th>Rating</th>
+                  <th>Deliveries</th>
+                  <th>Distance</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {drivers.map((d) => (
+                  <tr key={d.id}>
+                    <td>
+                      <Link to={`/admin/drivers/${d.id}`} className="admin-table-link">
+                        {d.nama}
+                      </Link>
+                    </td>
+                    <td>{d.jenis_kendaraan}</td>
+                    <td>{d.no_plat}</td>
+                    <td>&#9733; {d.rating.toFixed(2)}</td>
+                    <td>{d.total_pengiriman}</td>
+                    <td>{d.total_jarak_km.toFixed(1)} km</td>
+                    <td>
+                      <span className={`admin-badge status-${d.status}`}>
+                        {d.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
