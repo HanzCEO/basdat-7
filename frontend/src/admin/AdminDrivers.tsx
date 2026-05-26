@@ -80,7 +80,7 @@ export default function AdminDrivers() {
                 <div className="admin-driver-meta">
                   <span>&#9733; {d.rating.toFixed(2)}</span>
                   <span>{d.total_pengiriman} deliveries</span>
-                  <span>{d.total_jarak_km.toFixed(1)} km</span>
+                  <span>{d.total_distance.toFixed(1)} km</span>
                   <span>
                     <span className={`admin-badge status-${d.status}`}>
                       {d.status}
@@ -118,7 +118,7 @@ export default function AdminDrivers() {
                     <td>{d.no_plat}</td>
                     <td>&#9733; {d.rating.toFixed(2)}</td>
                     <td>{d.total_pengiriman}</td>
-                    <td>{d.total_jarak_km.toFixed(1)} km</td>
+                    <td>{d.total_distance.toFixed(1)} km</td>
                     <td>
                       <span className={`admin-badge status-${d.status}`}>
                         {d.status}

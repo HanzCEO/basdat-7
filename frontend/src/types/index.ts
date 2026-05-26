@@ -58,9 +58,8 @@ export interface AdminDriverSummary {
   rating: number;
   total_pengiriman: number;
   created_at: string;
-  total_jarak_km: number;
+  total_distance: number;
   total_waktu_menit: number;
-  avg_distance: number;
   delivery_count: number;
 }
 
