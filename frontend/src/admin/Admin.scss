@@ -249,6 +249,26 @@
     color: #d97706;
   }
 
+  &.status-dibatalkan {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  &.status-dikonfirmasi {
+    background: #e0f2fe;
+    color: #0284c7;
+  }
+
+  &.status-driver_ditugaskan {
+    background: #ede9fe;
+    color: #7c3aed;
+  }
+
+  &.status-menunggu_konfirmasi {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
   &.status-dalam_pengiriman {
     background: #dbeafe;
     color: #2563eb;
