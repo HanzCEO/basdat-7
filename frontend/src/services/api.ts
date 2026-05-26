@@ -97,6 +97,12 @@ export async function getTracking(pesananId: number) {
   }>(`/tracking/${pesananId}`);
 }
 
+export async function updateDeliveryStatus(pesananId: number, status: string) {
+  return fetchApi<{ message: string }>(`/pengiriman/${pesananId}/status?status=${status}`, {
+    method: "PUT",
+  });
+}
+
 export async function getAvailableDrivers(): Promise<Driver[]> {
   const json = await fetchApi<any[]>("/driver/available");
   return json.map(mapDriver);
