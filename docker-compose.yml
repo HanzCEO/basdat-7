@@ -60,6 +60,7 @@ services:
         done &&
         /opt/lampp/bin/mysql -h 127.0.0.1 -u root -e \"CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY ''; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;\" &&
         /opt/lampp/bin/mysql -h 127.0.0.1 -u root < /sql/schema.sql &&
+        /opt/lampp/bin/mysql -h 127.0.0.1 -u root < /sql/migration.sql &&
         /opt/lampp/bin/mysql -h 127.0.0.1 -u root < /sql/seed.sql
       "
 
