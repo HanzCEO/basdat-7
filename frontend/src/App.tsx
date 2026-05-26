@@ -21,7 +21,7 @@ function AppContent() {
   const [pelangganAlamat, setPelangganAlamat] = useState("");
   const [pesananId, setPesananId] = useState<number | null>(null);
   const [isDispatching, setIsDispatching] = useState(false);
-  const [driverPosition, setDriverPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [driverProgress, setDriverProgress] = useState<number | null>(null);
   const { items, clearCart } = useCart();
   const dispatchLock = useRef(false);
 
@@ -100,13 +100,13 @@ function AppContent() {
     setPhase('order');
     setDriver(null);
     setPesananId(null);
-    setDriverPosition(null);
+    setDriverProgress(null);
   }, []);
 
   useEffect(() => {
     if (phase !== 'delivery' || !pesananId || !selectedRestaurant) return;
 
-    setDriverPosition({ lat: selectedRestaurant.lat, lng: selectedRestaurant.lng });
+    setDriverProgress(0);
 
     const MENUJU_DURATION = 5000;
     const PENGIRIMAN_DURATION = 15000;
@@ -118,23 +118,19 @@ function AppContent() {
       const elapsed = Date.now() - startTime;
 
       if (elapsed < MENUJU_DURATION) {
-        setDriverPosition({ lat: selectedRestaurant.lat, lng: selectedRestaurant.lng });
+        setDriverProgress(0);
       } else if (elapsed < MENUJU_DURATION + PENGIRIMAN_DURATION) {
         if (!advancedToPengiriman) {
           advancedToPengiriman = true;
           updateDeliveryStatus(pesananId, 'dalam_pengiriman').catch(() => {});
         }
-        const p = (elapsed - MENUJU_DURATION) / PENGIRIMAN_DURATION;
-        setDriverPosition({
-          lat: selectedRestaurant.lat + (location.lat - selectedRestaurant.lat) * p,
-          lng: selectedRestaurant.lng + (location.lng - selectedRestaurant.lng) * p,
-        });
+        setDriverProgress((elapsed - MENUJU_DURATION) / PENGIRIMAN_DURATION);
       } else {
         if (!advancedToSelesai) {
           advancedToSelesai = true;
           updateDeliveryStatus(pesananId, 'selesai').catch(() => {});
         }
-        setDriverPosition({ lat: location.lat, lng: location.lng });
+        setDriverProgress(1);
       }
     };
 
@@ -155,7 +151,7 @@ function AppContent() {
         selectedRestaurant={selectedRestaurant}
         onSelectRestaurant={setSelectedRestaurant}
         phase={phase}
-        driverPosition={driverPosition}
+        driverProgress={driverProgress}
       />
       <PullUpMenu
         restaurant={selectedRestaurant || { id: "", name: "", cuisine: "", rating: 0, lat: 0, lng: 0, menu: [] }}

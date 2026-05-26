@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from "react-leaflet";
 import { Restaurant } from "../types";
 import "leaflet/dist/leaflet.css";
@@ -27,7 +27,34 @@ interface MapViewProps {
   userLocation: { lat: number; lng: number };
   selectedRestaurant: Restaurant | null;
   phase: 'order' | 'delivery';
-  driverPosition?: { lat: number; lng: number } | null;
+  driverProgress?: number | null;
+}
+
+function getPositionAlongRoute(coords: [number, number][], progress: number): [number, number] {
+  if (coords.length === 0) return coords[0];
+  if (progress <= 0) return coords[0];
+  if (progress >= 1) return coords[coords.length - 1];
+
+  let totalDist = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    totalDist += Math.hypot(coords[i + 1][0] - coords[i][0], coords[i + 1][1] - coords[i][1]);
+  }
+
+  let cumDist = 0;
+  const targetDist = progress * totalDist;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const segDist = Math.hypot(coords[i + 1][0] - coords[i][0], coords[i + 1][1] - coords[i][1]);
+    if (cumDist + segDist >= targetDist) {
+      const t = segDist > 0 ? (targetDist - cumDist) / segDist : 0;
+      return [
+        coords[i][0] + (coords[i + 1][0] - coords[i][0]) * t,
+        coords[i][1] + (coords[i + 1][1] - coords[i][1]) * t,
+      ];
+    }
+    cumDist += segDist;
+  }
+
+  return coords[coords.length - 1];
 }
 
 function MapController({ lat, lng }: { lat: number; lng: number }) {
@@ -59,9 +86,16 @@ export default function MapView({
   userLocation,
   selectedRestaurant,
   phase,
-  driverPosition,
+  driverProgress,
 }: MapViewProps) {
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
+
+  const driverLatLng = useMemo(() => {
+    if (driverProgress === undefined || driverProgress === null || !routeCoords) return null;
+    const reversed = [...routeCoords].reverse();
+    const pos = getPositionAlongRoute(reversed, driverProgress);
+    return { lat: pos[0], lng: pos[1] };
+  }, [driverProgress, routeCoords]);
 
   useEffect(() => {
     if (!selectedRestaurant) {
@@ -134,8 +168,8 @@ export default function MapView({
           />
         </>
       )}
-      {driverPosition && (
-        <Marker position={[driverPosition.lat, driverPosition.lng]} icon={driverIcon}>
+      {driverLatLng && (
+        <Marker position={[driverLatLng.lat, driverLatLng.lng]} icon={driverIcon}>
           <Popup>
             <div className="driver-popup">
               <strong>Driver</strong>
