@@ -2,6 +2,7 @@ import { useState, useEffect, memo } from "react";
 import { MenuItem as MenuItemType } from "../types";
 import { useCart } from "../context/CartContext";
 
+const FOODISH_API_URL = import.meta.env.VITE_FOODISH_API_URL || "http://localhost:6655/api/";
 const imageCache = new Map<string, string>();
 const pendingFetches = new Set<string>();
 
@@ -27,7 +28,7 @@ const MenuItem = memo(function MenuItem({ item, restaurantId, restaurantName, is
     if (pendingFetches.has(id)) return;
 
     pendingFetches.add(id);
-    fetch("https://foodish-api.com/api/")
+    fetch(FOODISH_API_URL)
       .then((res) => res.json())
       .then((data) => {
         imageCache.set(id, data.image);
