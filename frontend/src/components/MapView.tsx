@@ -14,12 +14,20 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+const driverIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:28px;height:28px;background:#4285F4;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.3);">D</div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+});
+
 interface MapViewProps {
   restaurants: Restaurant[];
   onSelectRestaurant: (restaurant: Restaurant) => void;
   userLocation: { lat: number; lng: number };
   selectedRestaurant: Restaurant | null;
   phase: 'order' | 'delivery';
+  driverPosition?: { lat: number; lng: number } | null;
 }
 
 function MapController({ lat, lng }: { lat: number; lng: number }) {
@@ -51,6 +59,7 @@ export default function MapView({
   userLocation,
   selectedRestaurant,
   phase,
+  driverPosition,
 }: MapViewProps) {
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
 
@@ -124,6 +133,15 @@ export default function MapView({
             pathOptions={{ color: "#4285F4", weight: 4, opacity: 0.8 }}
           />
         </>
+      )}
+      {driverPosition && (
+        <Marker position={[driverPosition.lat, driverPosition.lng]} icon={driverIcon}>
+          <Popup>
+            <div className="driver-popup">
+              <strong>Driver</strong>
+            </div>
+          </Popup>
+        </Marker>
       )}
     </MapContainer>
   );
