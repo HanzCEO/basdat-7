@@ -9,6 +9,8 @@ import PullUpMenu from "./components/PullUpMenu";
 import Onboarding, { checkOnboardingCompleted } from "./components/Onboarding";
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
+import AdminPesanan from "./admin/AdminPesanan";
+import AdminPesananDetail from "./admin/AdminPesananDetail";
 import AdminDrivers from "./admin/AdminDrivers";
 import AdminDriverDetail from "./admin/AdminDriverDetail";
 import AdminLiveMap from "./admin/AdminLiveMap";
@@ -200,6 +202,8 @@ function App() {
         />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="pesanan" element={<AdminPesanan />} />
+          <Route path="pesanan/:id" element={<AdminPesananDetail />} />
           <Route path="drivers" element={<AdminDrivers />} />
           <Route path="drivers/:id" element={<AdminDriverDetail />} />
           <Route path="map" element={<AdminLiveMap />} />

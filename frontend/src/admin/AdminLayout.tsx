@@ -3,6 +3,7 @@ import "./Admin.scss";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: "D" },
+  { to: "/admin/pesanan", label: "Pesanan", icon: "P" },
   { to: "/admin/drivers", label: "Drivers", icon: "D" },
   { to: "/admin/map", label: "Live Map", icon: "M" },
   { to: "/admin/reports", label: "Reports", icon: "R" },

@@ -1,6 +1,7 @@
 import {
   Restaurant, MenuItem, Driver, AdminStats, AdminDriverSummary,
   AdminDriverDetail, DriverPerformance, DriverLocation, ActiveDelivery,
+  OrderSummary, OrderDetail,
 } from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -145,4 +146,23 @@ export async function getDriverLocations(): Promise<DriverLocation[]> {
 
 export async function getActiveDeliveries(): Promise<ActiveDelivery[]> {
   return fetchApi<ActiveDelivery[]>("/admin/deliveries/active");
+}
+
+export async function getAdminOrders(
+  search?: string,
+  status?: string,
+  page?: number,
+  limit?: number,
+): Promise<{ total: number; page: number; limit: number; data: OrderSummary[] }> {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (status) params.set("status", status);
+  if (page) params.set("page", String(page));
+  if (limit) params.set("limit", String(limit));
+  const qs = params.toString();
+  return fetchApi(`/admin/pesanan${qs ? "?" + qs : ""}`);
+}
+
+export async function getAdminOrderDetail(id: number): Promise<OrderDetail> {
+  return fetchApi<OrderDetail>(`/admin/pesanan/${id}`);
 }

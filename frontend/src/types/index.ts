@@ -133,6 +133,74 @@ export interface DriverLocation {
   lng: number;
 }
 
+export interface OrderSummary {
+  id: number;
+  status: string;
+  total_harga: number;
+  alamat_pengiriman: string;
+  created_at: string;
+  pelanggan_nama: string;
+  restoran_nama: string;
+  driver_id: number | null;
+  driver_nama: string | null;
+  jenis_kendaraan: string | null;
+  no_plat: string | null;
+  status_pengiriman: string | null;
+  waktu_ditugaskan: string | null;
+  waktu_pickup: string | null;
+  waktu_sampai: string | null;
+}
+
+export interface OrderDetail {
+  pesanan: {
+    id: number;
+    pelanggan_id: number;
+    restoran_id: number;
+    driver_id: number | null;
+    status: string;
+    total_harga: number;
+    alamat_pengiriman: string;
+    catatan: string | null;
+    created_at: string;
+    pelanggan_nama: string;
+    pelanggan_email: string;
+    pelanggan_no_hp: string;
+    pelanggan_alamat: string;
+    restoran_nama: string;
+    restoran_alamat: string;
+    restoran_no_telp: string;
+    restoran_rating: number;
+  };
+  driver: {
+    id: number;
+    nama: string;
+    no_hp: string;
+    jenis_kendaraan: string;
+    no_plat: string;
+    rating: number;
+    status: string;
+  } | null;
+  pengiriman: {
+    id: number;
+    pesanan_id: number;
+    driver_id: number;
+    waktu_ditugaskan: string | null;
+    waktu_pickup: string | null;
+    waktu_sampai: string | null;
+    jarak_km: number | null;
+    status_pengiriman: string;
+    dest_lat: number | null;
+    dest_lng: number | null;
+  } | null;
+  items: {
+    qty: number;
+    harga_saat_pesan: number;
+    subtotal: number;
+    nama: string;
+    deskripsi: string;
+  }[];
+}
+
 export interface ActiveDelivery {
   pesanan_id: number;
   pesanan_status: string;
