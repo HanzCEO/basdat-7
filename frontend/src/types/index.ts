@@ -35,4 +35,6 @@ export interface Driver {
   vehicle: string;
   plateNumber: string;
   rating: number;
+  lat?: number;
+  lng?: number;
 }
