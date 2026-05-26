@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { CartProvider, useCart } from "./context/CartContext";
 import { Restaurant, Driver } from "./types";
-import { getRestaurants } from "./services/api";
+import { getRestaurants, getPelanggan, createPesanan, assignDriver, startPengiriman } from "./services/api";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
 import PullUpMenu from "./components/PullUpMenu";
@@ -17,7 +17,12 @@ function AppContent() {
   const [phase, setPhase] = useState<'order' | 'delivery'>('order');
   const [driver, setDriver] = useState<Driver | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const { clearCart } = useCart();
+  const [pelangganId, setPelangganId] = useState<number | null>(null);
+  const [pelangganAlamat, setPelangganAlamat] = useState("");
+  const [pesananId, setPesananId] = useState<number | null>(null);
+  const [isDispatching, setIsDispatching] = useState(false);
+  const { items, clearCart } = useCart();
+  const dispatchLock = useRef(false);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -34,6 +39,24 @@ function AppContent() {
     getRestaurants().then(setRestaurants).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    const stored = localStorage.getItem("pelanggan_id");
+    if (stored) {
+      setPelangganId(Number(stored));
+      setPelangganAlamat(localStorage.getItem("pelanggan_alamat") || "");
+    } else {
+      getPelanggan().then((data) => {
+        if (data.length > 0) {
+          const p = data[0];
+          setPelangganId(p.id);
+          setPelangganAlamat(p.alamat);
+          localStorage.setItem("pelanggan_id", String(p.id));
+          localStorage.setItem("pelanggan_alamat", p.alamat);
+        }
+      }).catch(console.error);
+    }
+  }, []);
+
   const location = userLocation ?? DEFAULT_LOCATION;
 
   const filteredRestaurants = useMemo(() => {
@@ -43,15 +66,39 @@ function AppContent() {
     );
   }, [searchQuery, restaurants]);
 
-  const handleDispatch = useCallback(() => {
-    setPhase('delivery');
-    clearCart();
-  }, [clearCart]);
+  const handleDispatch = useCallback(async () => {
+    if (dispatchLock.current || !selectedRestaurant || !pelangganId) return;
+    dispatchLock.current = true;
+    setIsDispatching(true);
+
+    try {
+      const body = {
+        pelanggan_id: pelangganId,
+        restoran_id: Number(selectedRestaurant.id),
+        alamat_pengiriman: pelangganAlamat,
+        catatan: "",
+        items: items.map((c) => ({ menu_id: Number(c.item.id), qty: c.quantity })),
+      };
+      const order = await createPesanan(body);
+      await assignDriver(order.pesanan_id);
+      await startPengiriman(order.pesanan_id);
+      setPesananId(order.pesanan_id);
+      setPhase('delivery');
+      clearCart();
+    } catch (err) {
+      console.error("Dispatch failed:", err);
+      alert("Gagal memproses pesanan. Silakan coba lagi.");
+    } finally {
+      setIsDispatching(false);
+      dispatchLock.current = false;
+    }
+  }, [selectedRestaurant, pelangganId, pelangganAlamat, items, clearCart]);
 
   const handleClose = useCallback(() => {
     setSelectedRestaurant(null);
     setPhase('order');
     setDriver(null);
+    setPesananId(null);
   }, []);
 
   return (
@@ -72,6 +119,8 @@ function AppContent() {
         onDispatch={handleDispatch}
         phase={phase}
         driver={driver}
+        pesananId={pesananId}
+        isDispatching={isDispatching}
         isVisible={!!selectedRestaurant}
       />
     </div>

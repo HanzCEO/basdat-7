@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Restaurant, Driver } from "../types";
+import { getTracking } from "../services/api";
 import MenuItem from "./MenuItem";
 import { useCart } from "../context/CartContext";
 import ConfirmDialog from "./ConfirmDialog";
@@ -14,23 +15,73 @@ interface PullUpMenuProps {
   onDispatch: () => void;
   phase: 'order' | 'delivery';
   driver: Driver | null;
+  pesananId: number | null;
+  isDispatching: boolean;
   isVisible: boolean;
 }
 
-export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, driver, isVisible }: PullUpMenuProps) {
+const STAGE_LABELS: Record<string, string> = {
+  menunggu_konfirmasi: "Pesanan Diterima",
+  driver_ditugaskan: "Mencarikan Driver",
+  menuju_restoran: "Driver Menuju Restoran",
+  sampai_restoran: "Sampai di Restoran",
+  menuju_pelanggan: "Dalam Perjalanan",
+  selesai: "Selesai",
+};
+
+const STAGE_ORDER = [
+  "menunggu_konfirmasi",
+  "driver_ditugaskan",
+  "menuju_restoran",
+  "sampai_restoran",
+  "menuju_pelanggan",
+  "selesai",
+];
+
+export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, driver, pesananId, isDispatching, isVisible }: PullUpMenuProps) {
   const [menuHeight, setMenuHeight] = useState(COLLAPSED_HEIGHT);
   const [isMenuDragging, setIsMenuDragging] = useState(false);
   const [isPesanDragging, setIsPesanDragging] = useState(false);
   const [pesanOffset, setPesanOffset] = useState(0);
+  const [trackingDriver, setTrackingDriver] = useState<Driver | null>(null);
+  const [currentStage, setCurrentStage] = useState("");
   const { totalItems, totalPrice, items, pendingItem, confirmPendingItem, cancelPendingItem } = useCart();
-  
-  // Reset height when restaurant changes or phase goes to delivery
+
   useEffect(() => {
     setMenuHeight(COLLAPSED_HEIGHT);
   }, [restaurant.id, phase]);
 
+  useEffect(() => {
+    if (phase !== 'delivery' || !pesananId) return;
+
+    const fetchTracking = async () => {
+      try {
+        const data = await getTracking(pesananId);
+        const p = data.pengiriman;
+        if (p) {
+          setTrackingDriver({
+            id: String(p.driver_id || ""),
+            name: p.driver_nama || "",
+            vehicle: "",
+            plateNumber: "",
+            rating: 0,
+          });
+          setCurrentStage(p.status_pengiriman || "menunggu_konfirmasi");
+        } else {
+          setCurrentStage("menunggu_konfirmasi");
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    fetchTracking();
+    const poll = setInterval(fetchTracking, 3000);
+    return () => clearInterval(poll);
+  }, [phase, pesananId]);
+
   const existingRestaurantName = items[0]?.restaurantName ?? "";
-  
+
   const dragRef = useRef({
     startY: 0,
     startX: 0,
@@ -141,36 +192,8 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
   const recommendedItems = restaurant.menu.filter(item => item.isRecommended);
   const otherItems = restaurant.menu.filter(item => !item.isRecommended);
 
-  const deliveryStages = [
-    { key: 'received', label: 'Pesanan Diterima' },
-    { key: 'finding', label: 'Mencarikan Driver' },
-    { key: 'to_restaurant', label: 'Driver Menuju Restoran' },
-    { key: 'on_way', label: 'Dalam Perjalanan' },
-    { key: 'done', label: 'Selesai' },
-  ];
-
-  const [deliveryStageIndex, setDeliveryStageIndex] = useState(0);
-
-  useEffect(() => {
-    if (phase === 'delivery') {
-      setDeliveryStageIndex(0);
-    }
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== 'delivery') return;
-    if (deliveryStageIndex >= deliveryStages.length - 1) return;
-    const id = setInterval(() => {
-      setDeliveryStageIndex((prev) => {
-        if (prev >= deliveryStages.length - 1) {
-          clearInterval(id);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 3000);
-    return () => clearInterval(id);
-  }, [phase, deliveryStageIndex, deliveryStages.length]);
+  const activeDriver = trackingDriver || driver;
+  const stageIndex = STAGE_ORDER.indexOf(currentStage);
 
   if (!isVisible) return null;
 
@@ -219,7 +242,7 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
           </>
         )}
 
-        {phase === 'delivery' && driver && (
+        {phase === 'delivery' && (
           <div className="delivery-content">
             <header className="pullup-header">
               <div className="pullup-info">
@@ -229,27 +252,36 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
               <button className="btn-close" onClick={onClose}>&times;</button>
             </header>
 
-            <div className="driver-profile">
-              <div className="driver-avatar">{driver.name.charAt(0)}</div>
-              <div className="driver-details">
-                <span className="driver-name">{driver.name}</span>
-                <span className="driver-vehicle">{driver.vehicle} - {driver.plateNumber}</span>
-                <span className="driver-rating">Rating: {driver.rating}</span>
+            {activeDriver && (
+              <div className="driver-profile">
+                <div className="driver-avatar">{activeDriver.name.charAt(0)}</div>
+                <div className="driver-details">
+                  <span className="driver-name">{activeDriver.name}</span>
+                  <span className="driver-vehicle">{activeDriver.vehicle}</span>
+                  <span className="driver-rating">Rating: {activeDriver.rating}</span>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="progress-bar-track">
               <div
                 className="progress-bar-fill"
-                style={{ width: `${(deliveryStageIndex / (deliveryStages.length - 1)) * 100}%` }}
+                style={{ width: `${stageIndex >= 0 ? (stageIndex / (STAGE_ORDER.length - 1)) * 100 : 0}%` }}
               />
             </div>
 
             <div className="delivery-progress">
-              <div className="progress-step active">
-                <div className="progress-step-indicator">{'\u25CF'}</div>
-                <span className="progress-step-label">{deliveryStages[deliveryStageIndex].label}</span>
-              </div>
+              {STAGE_ORDER.map((key, i) => {
+                const cls = i < stageIndex ? "completed" : i === stageIndex ? "active" : "pending";
+                return (
+                  <div key={key} className={`progress-step ${cls}`}>
+                    <div className="progress-step-indicator">
+                      {i < stageIndex ? '\u2713' : '\u25CF'}
+                    </div>
+                    <span className="progress-step-label">{STAGE_LABELS[key]}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -267,19 +299,22 @@ export default function PullUpMenu({ restaurant, onClose, onDispatch, phase, dri
             style={{
               position: isPesanDragging ? "absolute" : "relative",
               right: 0,
-              width: pesanWidth,
+              width: isDispatching ? undefined : pesanWidth,
               borderRadius: isPesanDragging && pesanOffset >= dragRef.current.dispatchThreshold ? 0 : undefined,
               zIndex: isPesanDragging ? 10 : 2,
             }}
+            disabled={isDispatching}
             onMouseDown={(e) => {
+              if (isDispatching) return;
               e.preventDefault();
               handlePesanPointerDown(e.clientX);
             }}
             onTouchStart={(e) => {
+              if (isDispatching) return;
               handlePesanPointerDown(e.touches[0].clientX);
             }}
           >
-            Pesan
+            {isDispatching ? "Memproses..." : "Pesan"}
           </button>
         </div>
       )}
