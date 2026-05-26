@@ -19,20 +19,20 @@ function mapMenu(item: any): MenuItem {
     id: String(item.id),
     name: item.nama,
     description: item.deskripsi || "",
-    price: item.harga,
-    isRecommended: Boolean(item.is_recommended),
-    isOutOfStock: Boolean(item.is_out_of_stock),
+    price: Number(item.harga),
+    isRecommended: false,
+    isOutOfStock: item.is_available === 0,
   };
 }
 
 function mapRestaurant(r: any): Restaurant {
   return {
     id: String(r.id),
-    name: r.nama_restoran,
-    cuisine: r.cuisine,
+    name: r.nama,
+    cuisine: "",
     rating: Number(r.rating),
-    lat: Number(r.lat),
-    lng: Number(r.lng),
+    lat: Number(r.latitude),
+    lng: Number(r.longitude),
     menu: (r.menu || []).map(mapMenu),
   };
 }
@@ -41,7 +41,7 @@ function mapDriver(d: any): Driver {
   return {
     id: String(d.id),
     name: d.nama,
-    vehicle: d.kendaraan,
+    vehicle: d.jenis_kendaraan,
     plateNumber: d.no_plat,
     rating: Number(d.rating),
   };

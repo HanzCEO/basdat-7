@@ -24,8 +24,7 @@ const STAGE_LABELS: Record<string, string> = {
   menunggu_konfirmasi: "Pesanan Diterima",
   driver_ditugaskan: "Mencarikan Driver",
   menuju_restoran: "Driver Menuju Restoran",
-  sampai_restoran: "Sampai di Restoran",
-  menuju_pelanggan: "Dalam Perjalanan",
+  dalam_pengiriman: "Dalam Perjalanan",
   selesai: "Selesai",
 };
 
@@ -33,8 +32,7 @@ const STAGE_ORDER = [
   "menunggu_konfirmasi",
   "driver_ditugaskan",
   "menuju_restoran",
-  "sampai_restoran",
-  "menuju_pelanggan",
+  "dalam_pengiriman",
   "selesai",
 ];
 
