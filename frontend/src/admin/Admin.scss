@@ -116,10 +116,21 @@
   border-radius: 12px;
   padding: 20px;
   border: 1px solid var(--color-gray-light);
+  position: relative;
+  overflow: hidden;
 
   &-icon {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    opacity: 0.07;
     color: var(--color-blue);
-    margin-bottom: 8px;
+    pointer-events: none;
+
+    svg {
+      width: 90px;
+      height: 90px;
+    }
   }
 
   &-label {
@@ -127,18 +138,21 @@
     color: var(--color-gray);
     font-weight: 500;
     margin-bottom: 8px;
+    position: relative;
   }
 
   &-value {
     font-size: 28px;
     font-weight: 700;
     color: var(--color-black);
+    position: relative;
   }
 
   &-sub {
     font-size: 12px;
     color: var(--color-gray);
     margin-top: 4px;
+    position: relative;
   }
 }
 

@@ -46,7 +46,7 @@ export default function AdminDashboard() {
         {statCards.map((card) => (
           <div key={card.label} className="admin-stat-card">
             <div className="admin-stat-card-icon">
-              <card.icon size={20} />
+              <card.icon />
             </div>
             <div className="admin-stat-card-label">{card.label}</div>
             <div className="admin-stat-card-value">{card.value}</div>
