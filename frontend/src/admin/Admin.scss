@@ -121,15 +121,15 @@
 
   &-icon {
     position: absolute;
-    bottom: -10px;
-    right: -10px;
-    opacity: 0.07;
+    bottom: -25px;
+    right: -25px;
+    opacity: 0.06;
     color: var(--color-blue);
     pointer-events: none;
 
     svg {
-      width: 90px;
-      height: 90px;
+      width: 130px;
+      height: 130px;
     }
   }
 
