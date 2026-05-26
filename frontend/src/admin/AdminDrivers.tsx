@@ -82,6 +82,8 @@ export default function AdminDrivers() {
                   <span><Star size={14} className="star-icon" /> {d.rating.toFixed(2)}</span>
                   <span>{d.total_pengiriman} deliveries</span>
                   <span>{d.total_distance.toFixed(1)} km</span>
+                  <span>{d.total_waktu_menit} min</span>
+                  <span>{d.no_hp}</span>
                   <span>
                     <span className={`admin-badge status-${d.status}`}>
                       {d.status}
@@ -98,33 +100,41 @@ export default function AdminDrivers() {
             <table className="admin-table">
               <thead>
                 <tr>
+                  <th>ID</th>
                   <th>Name</th>
+                  <th>Phone</th>
                   <th>Vehicle</th>
                   <th>Plate</th>
                   <th>Rating</th>
                   <th>Deliveries</th>
                   <th>Distance</th>
+                  <th>Active Time</th>
                   <th>Status</th>
+                  <th>Registered</th>
                 </tr>
               </thead>
               <tbody>
                 {drivers.map((d) => (
                   <tr key={d.id}>
+                    <td>{d.id}</td>
                     <td>
                       <Link to={`/admin/drivers/${d.id}`} className="admin-table-link">
                         {d.nama}
                       </Link>
                     </td>
+                    <td>{d.no_hp}</td>
                     <td>{d.jenis_kendaraan}</td>
                     <td>{d.no_plat}</td>
                     <td><Star size={14} className="star-icon" /> {d.rating.toFixed(2)}</td>
                     <td>{d.total_pengiriman}</td>
                     <td>{d.total_distance.toFixed(1)} km</td>
+                    <td>{d.total_waktu_menit} min</td>
                     <td>
                       <span className={`admin-badge status-${d.status}`}>
                         {d.status}
                       </span>
                     </td>
+                    <td>{new Date(d.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>

@@ -150,6 +150,7 @@ export interface OrderSummary {
   status: string;
   total_harga: number;
   alamat_pengiriman: string;
+  catatan: string | null;
   created_at: string;
   pelanggan_nama: string;
   restoran_nama: string;

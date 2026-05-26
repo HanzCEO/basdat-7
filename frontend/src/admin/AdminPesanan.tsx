@@ -70,6 +70,8 @@ export default function AdminPesanan() {
                   <th>Order Status</th>
                   <th>Delivery Status</th>
                   <th className="text-right">Total</th>
+                  <th>Address</th>
+                  <th>Notes</th>
                   <th>Created</th>
                 </tr>
               </thead>
@@ -97,6 +99,12 @@ export default function AdminPesanan() {
                       ) : "-"}
                     </td>
                     <td className="text-right">{formatPrice(o.total_harga)}</td>
+                    <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={o.alamat_pengiriman}>
+                      {o.alamat_pengiriman}
+                    </td>
+                    <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={o.catatan || ""}>
+                      {o.catatan || "-"}
+                    </td>
                     <td>{new Date(o.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
