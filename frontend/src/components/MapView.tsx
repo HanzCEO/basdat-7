@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from "react-leaflet";
 import { Restaurant } from "../types";
 import "leaflet/dist/leaflet.css";
@@ -80,6 +80,64 @@ function RouteBounds({ coords }: { coords: [number, number][] }) {
   return null;
 }
 
+function AnimatedDriverMarker({
+  routeCoords,
+  driverProgress,
+}: {
+  routeCoords: [number, number][] | null;
+  driverProgress: number | null;
+}) {
+  const map = useMap();
+  const markerRef = useRef<L.Marker | null>(null);
+  const animFrameRef = useRef<number>(0);
+
+  useEffect(() => {
+    const marker = L.marker([0, 0], { icon: driverIcon });
+    marker.bindPopup('<div class="driver-popup"><strong>Driver</strong></div>');
+    marker.addTo(map);
+    markerRef.current = marker;
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      map.removeLayer(marker);
+    };
+  }, [map]);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker || driverProgress == null || !routeCoords || routeCoords.length === 0) return;
+
+    const reversed = [...routeCoords].reverse();
+    const target = getPositionAlongRoute(reversed, driverProgress);
+
+    cancelAnimationFrame(animFrameRef.current);
+
+    const current = marker.getLatLng();
+    const dist = Math.hypot(current.lat - target[0], current.lng - target[1]);
+
+    if (dist > 0.5) {
+      marker.setLatLng(target);
+      return;
+    }
+
+    const from = { lat: current.lat, lng: current.lng };
+    const to = { lat: target[0], lng: target[1] };
+    const duration = 900;
+    const start = performance.now();
+
+    function animate(time: number) {
+      const t = Math.min((time - start) / duration, 1);
+      marker.setLatLng([from.lat + (to.lat - from.lat) * t, from.lng + (to.lng - from.lng) * t]);
+      if (t < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    }
+
+    animFrameRef.current = requestAnimationFrame(animate);
+  }, [driverProgress, routeCoords]);
+
+  return null;
+}
+
 export default function MapView({
   restaurants,
   onSelectRestaurant,
@@ -89,13 +147,6 @@ export default function MapView({
   driverProgress,
 }: MapViewProps) {
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
-
-  const driverLatLng = useMemo(() => {
-    if (driverProgress === undefined || driverProgress === null || !routeCoords) return null;
-    const reversed = [...routeCoords].reverse();
-    const pos = getPositionAlongRoute(reversed, driverProgress);
-    return { lat: pos[0], lng: pos[1] };
-  }, [driverProgress, routeCoords]);
 
   useEffect(() => {
     if (!selectedRestaurant) {
@@ -168,14 +219,8 @@ export default function MapView({
           />
         </>
       )}
-      {driverLatLng && (
-        <Marker position={[driverLatLng.lat, driverLatLng.lng]} icon={driverIcon}>
-          <Popup>
-            <div className="driver-popup">
-              <strong>Driver</strong>
-            </div>
-          </Popup>
-        </Marker>
+      {phase === 'delivery' && driverProgress != null && routeCoords && (
+        <AnimatedDriverMarker routeCoords={routeCoords} driverProgress={driverProgress} />
       )}
     </MapContainer>
   );
