@@ -138,7 +138,7 @@ function AppContent() {
     const intervalId = setInterval(tick, 1000);
 
     return () => clearInterval(intervalId);
-  }, [phase, pesananId, selectedRestaurant, location]);
+  }, [phase, pesananId]);
 
   return (
     <div className="app">
