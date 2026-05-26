@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   frontend:
     build:
@@ -24,7 +22,7 @@ services:
     ports:
       - "7891:8000"
     depends_on:
-      - xampp
+      - db-init
     networks:
       - app-net
     environment:
@@ -43,6 +41,26 @@ services:
       - xampp-data:/opt/lampp
     networks:
       - app-net
+
+  db-init:
+    image: tomsik68/xampp:8
+    networks:
+      - app-net
+    depends_on:
+      - xampp
+    volumes:
+      - ./backend/sql:/sql
+    command: >
+      sh -c "
+        echo 'Waiting for xampp...' &&
+        sleep 5 &&
+        /opt/lampp/bin/mysql -h xampp -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION; FLUSH PRIVILEGES;\" &&
+        echo 'Grant done, running schema...' &&
+        /opt/lampp/bin/mysql -h xampp -u root < /sql/schema.sql &&
+        echo 'Schema done, running seed...' &&
+        /opt/lampp/bin/mysql -h xampp -u root < /sql/seed.sql &&
+        echo 'DB initialized successfully'
+      "
 
 networks:
   app-net:
