@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { Routes, Route } from "react-router-dom";
 import { CartProvider, useCart } from "./context/CartContext";
 import { Restaurant, Driver } from "./types";
 import { getRestaurants, getPelanggan, createPesanan, assignDriver, startPengiriman, updateDeliveryStatus } from "./services/api";
@@ -6,6 +7,12 @@ import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
 import PullUpMenu from "./components/PullUpMenu";
 import Onboarding, { checkOnboardingCompleted } from "./components/Onboarding";
+import AdminLayout from "./admin/AdminLayout";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminDrivers from "./admin/AdminDrivers";
+import AdminDriverDetail from "./admin/AdminDriverDetail";
+import AdminLiveMap from "./admin/AdminLiveMap";
+import AdminReports from "./admin/AdminReports";
 import "./App.scss";
 
 const DEFAULT_LOCATION = { lat: -6.2088, lng: 106.8456 };
@@ -82,7 +89,7 @@ function AppContent() {
       };
       const order = await createPesanan(body);
       await assignDriver(order.pesanan_id);
-      await startPengiriman(order.pesanan_id);
+      await startPengiriman(order.pesanan_id, location.lat, location.lng);
       setPesananId(order.pesanan_id);
       setPhase('delivery');
       clearCart();
@@ -93,7 +100,7 @@ function AppContent() {
       setIsDispatching(false);
       dispatchLock.current = false;
     }
-  }, [selectedRestaurant, pelangganId, pelangganAlamat, items, clearCart]);
+  }, [selectedRestaurant, pelangganId, pelangganAlamat, items, clearCart, location]);
 
   const handleClose = useCallback(() => {
     setSelectedRestaurant(null);
@@ -180,11 +187,25 @@ function App() {
 
   return (
     <CartProvider>
-      {showOnboarding ? (
-        <Onboarding onComplete={handleOnboardingComplete} />
-      ) : (
-        <AppContent />
-      )}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            showOnboarding ? (
+              <Onboarding onComplete={handleOnboardingComplete} />
+            ) : (
+              <AppContent />
+            )
+          }
+        />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="drivers" element={<AdminDrivers />} />
+          <Route path="drivers/:id" element={<AdminDriverDetail />} />
+          <Route path="map" element={<AdminLiveMap />} />
+          <Route path="reports" element={<AdminReports />} />
+        </Route>
+      </Routes>
     </CartProvider>
   );
 }

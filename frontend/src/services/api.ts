@@ -1,4 +1,7 @@
-import { Restaurant, MenuItem, Driver } from "../types";
+import {
+  Restaurant, MenuItem, Driver, AdminStats, AdminDriverSummary,
+  AdminDriverDetail, DriverPerformance, DriverLocation, ActiveDelivery,
+} from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -83,8 +86,12 @@ export async function assignDriver(pesananId: number) {
   });
 }
 
-export async function startPengiriman(pesananId: number) {
-  return fetchApi<{ message: string }>(`/pengiriman/${pesananId}`, {
+export async function startPengiriman(pesananId: number, destLat?: number, destLng?: number) {
+  let path = `/pengiriman/${pesananId}`;
+  if (destLat !== undefined && destLng !== undefined) {
+    path += `?dest_lat=${destLat}&dest_lng=${destLng}`;
+  }
+  return fetchApi<{ message: string }>(path, {
     method: "POST",
   });
 }
@@ -106,4 +113,36 @@ export async function updateDeliveryStatus(pesananId: number, status: string) {
 export async function getAvailableDrivers(): Promise<Driver[]> {
   const json = await fetchApi<any[]>("/driver/available");
   return json.map(mapDriver);
+}
+
+export async function getAdminStats(): Promise<AdminStats> {
+  return fetchApi<AdminStats>("/admin/stats");
+}
+
+export async function getAdminDrivers(search?: string, status?: string): Promise<AdminDriverSummary[]> {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (status) params.set("status", status);
+  const qs = params.toString();
+  return fetchApi<AdminDriverSummary[]>(`/admin/drivers${qs ? "?" + qs : ""}`);
+}
+
+export async function getAdminDriverDetail(driverId: number): Promise<AdminDriverDetail> {
+  return fetchApi<AdminDriverDetail>(`/admin/drivers/${driverId}`);
+}
+
+export async function getDriverPerformance(driverId: number): Promise<DriverPerformance> {
+  return fetchApi<DriverPerformance>(`/admin/drivers/${driverId}/performance`);
+}
+
+export function getDriverReportUrl(driverId: number): string {
+  return `${BASE_URL}/admin/drivers/${driverId}/report`;
+}
+
+export async function getDriverLocations(): Promise<DriverLocation[]> {
+  return fetchApi<DriverLocation[]>("/admin/drivers/locations");
+}
+
+export async function getActiveDeliveries(): Promise<ActiveDelivery[]> {
+  return fetchApi<ActiveDelivery[]>("/admin/deliveries/active");
 }
