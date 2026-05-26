@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAdminOrders } from "../services/api";
 import { OrderSummary } from "../types";
@@ -13,11 +13,39 @@ const STATUSES = [
   "dibatalkan",
 ];
 
+type SortKey = "id" | "pelanggan_nama" | "restoran_nama" | "driver_nama" | "status" | "status_pengiriman" | "total_harga" | "alamat_pengiriman" | "created_at";
+
+function sortData(data: OrderSummary[], key: SortKey, dir: "asc" | "desc"): OrderSummary[] {
+  return [...data].sort((a, b) => {
+    const aVal = a[key];
+    const bVal = b[key];
+    if (aVal === null || aVal === undefined) return 1;
+    if (bVal === null || bVal === undefined) return -1;
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return dir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+    return dir === "asc" ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
+  });
+}
+
+const SORTABLE_COLS: { key: SortKey; label: string; align?: string }[] = [
+  { key: "id", label: "Order ID" },
+  { key: "pelanggan_nama", label: "Customer" },
+  { key: "restoran_nama", label: "Restaurant" },
+  { key: "driver_nama", label: "Driver" },
+  { key: "status", label: "Order Status" },
+  { key: "status_pengiriman", label: "Delivery Status" },
+  { key: "total_harga", label: "Total", align: "text-right" },
+  { key: "alamat_pengiriman", label: "Address" },
+];
+
 export default function AdminPesanan() {
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("id");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     setLoading(true);
@@ -26,6 +54,17 @@ export default function AdminPesanan() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [search, statusFilter]);
+
+  const sorted = useMemo(() => sortData(orders, sortKey, sortDir), [orders, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
 
   const formatPrice = (v: number) =>
     "Rp" + Number(v).toLocaleString("id-ID");
@@ -63,20 +102,22 @@ export default function AdminPesanan() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Restaurant</th>
-                  <th>Driver</th>
-                  <th>Order Status</th>
-                  <th>Delivery Status</th>
-                  <th className="text-right">Total</th>
-                  <th>Address</th>
+                  {SORTABLE_COLS.map((col) => (
+                    <th
+                      key={col.key}
+                      className={`admin-th-sortable${col.align ? " " + col.align : ""}${sortKey === col.key ? " active" : ""}`}
+                      onClick={() => handleSort(col.key)}
+                    >
+                      {col.label}
+                      {sortKey === col.key && <span className="sort-arrow">{sortDir === "asc" ? " ▲" : " ▼"}</span>}
+                    </th>
+                  ))}
                   <th>Notes</th>
                   <th>Created</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => (
+                {sorted.map((o) => (
                   <tr key={o.id}>
                     <td>
                       <Link to={`/admin/pesanan/${o.id}`} className="admin-table-link">

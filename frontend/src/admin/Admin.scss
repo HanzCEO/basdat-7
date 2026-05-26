@@ -211,6 +211,23 @@
   }
 }
 
+.admin-th-sortable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: var(--color-blue);
+  }
+
+  &.active {
+    color: var(--color-blue);
+  }
+}
+
+.sort-arrow {
+  font-size: 10px;
+}
+
 .admin-table-link {
   color: var(--color-blue);
   text-decoration: none;

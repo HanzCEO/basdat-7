@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 import { getAdminDrivers } from "../services/api";
@@ -6,12 +6,43 @@ import { AdminDriverSummary } from "../types";
 
 const STATUSES = ["", "available", "busy", "offline"];
 
+type SortKey = "id" | "nama" | "no_hp" | "jenis_kendaraan" | "no_plat" | "rating" | "total_pengiriman" | "total_distance" | "total_waktu_menit" | "status" | "created_at";
+
+function sortData(data: AdminDriverSummary[], key: SortKey, dir: "asc" | "desc"): AdminDriverSummary[] {
+  return [...data].sort((a, b) => {
+    const aVal = a[key];
+    const bVal = b[key];
+    if (aVal === null || aVal === undefined) return 1;
+    if (bVal === null || bVal === undefined) return -1;
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return dir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+    return dir === "asc" ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
+  });
+}
+
+const SORTABLE_COLS: { key: SortKey; label: string }[] = [
+  { key: "id", label: "ID" },
+  { key: "nama", label: "Name" },
+  { key: "no_hp", label: "Phone" },
+  { key: "jenis_kendaraan", label: "Vehicle" },
+  { key: "no_plat", label: "Plate" },
+  { key: "rating", label: "Rating" },
+  { key: "total_pengiriman", label: "Deliveries" },
+  { key: "total_distance", label: "Distance" },
+  { key: "total_waktu_menit", label: "Active Time" },
+  { key: "status", label: "Status" },
+  { key: "created_at", label: "Registered" },
+];
+
 export default function AdminDrivers() {
   const [drivers, setDrivers] = useState<AdminDriverSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [sortKey, setSortKey] = useState<SortKey>("id");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     setLoading(true);
@@ -20,6 +51,17 @@ export default function AdminDrivers() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [search, statusFilter]);
+
+  const sorted = useMemo(() => sortData(drivers, sortKey, sortDir), [drivers, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
 
   return (
     <div>
@@ -100,21 +142,20 @@ export default function AdminDrivers() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Vehicle</th>
-                  <th>Plate</th>
-                  <th>Rating</th>
-                  <th>Deliveries</th>
-                  <th>Distance</th>
-                  <th>Active Time</th>
-                  <th>Status</th>
-                  <th>Registered</th>
+                  {SORTABLE_COLS.map((col) => (
+                    <th
+                      key={col.key}
+                      className={`admin-th-sortable${sortKey === col.key ? " active" : ""}`}
+                      onClick={() => handleSort(col.key)}
+                    >
+                      {col.label}
+                      {sortKey === col.key && <span className="sort-arrow">{sortDir === "asc" ? " ▲" : " ▼"}</span>}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {drivers.map((d) => (
+                {sorted.map((d) => (
                   <tr key={d.id}>
                     <td>{d.id}</td>
                     <td>
