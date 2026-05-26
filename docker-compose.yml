@@ -44,22 +44,17 @@ services:
 
   db-init:
     image: tomsik68/xampp:8
-    networks:
-      - app-net
+    network_mode: service:xampp
     depends_on:
       - xampp
     volumes:
       - ./backend/sql:/sql
     command: >
       sh -c "
-        echo 'Waiting for xampp...' &&
         sleep 5 &&
-        /opt/lampp/bin/mysql -h xampp -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION; FLUSH PRIVILEGES;\" &&
-        echo 'Grant done, running schema...' &&
-        /opt/lampp/bin/mysql -h xampp -u root < /sql/schema.sql &&
-        echo 'Schema done, running seed...' &&
-        /opt/lampp/bin/mysql -h xampp -u root < /sql/seed.sql &&
-        echo 'DB initialized successfully'
+        /opt/lampp/bin/mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION; FLUSH PRIVILEGES;\" &&
+        /opt/lampp/bin/mysql -u root < /sql/schema.sql &&
+        /opt/lampp/bin/mysql -u root < /sql/seed.sql
       "
 
 networks:
