@@ -57,6 +57,106 @@ function RecenterMap({ points }: { points: Point[] }) {
   return null;
 }
 
+function AdminAnimatedMarkers({ locations }: { locations: DriverLocation[] }) {
+  const map = useMap();
+  const markersRef = useRef<Map<number, L.Marker>>(new Map());
+  const prevLocationsRef = useRef<Map<number, { lat: number; lng: number }>>(new Map());
+  const animFramesRef = useRef<Map<number, number>>(new Map());
+
+  useEffect(() => {
+    const markers = markersRef.current;
+    const prevLocations = prevLocationsRef.current;
+    const animFrames = animFramesRef.current;
+    const currentIds = new Set(locations.map((l) => l.driver_id));
+
+    for (const [id] of markers) {
+      if (!currentIds.has(id)) {
+        map.removeLayer(markers.get(id)!);
+        markers.delete(id);
+        prevLocations.delete(id);
+        if (animFrames.has(id)) {
+          cancelAnimationFrame(animFrames.get(id)!);
+          animFrames.delete(id);
+        }
+      }
+    }
+
+    for (const loc of locations) {
+      const id = loc.driver_id;
+      const newPos: [number, number] = [loc.lat, loc.lng];
+      const icon = getDriverIcon(loc.status, loc.status_pengiriman);
+      const popupHtml = `<div style="font-family:Quicksand,sans-serif;padding:4px">
+        <strong>${loc.nama}</strong><br />
+        ${loc.jenis_kendaraan} &middot; ${loc.no_plat}<br />
+        &#9733; ${loc.rating.toFixed(2)}<br />
+        <span style="font-size:12px;color:#6b7280">
+          ${loc.status_pengiriman === "menuju_restoran" ? "Heading to restaurant" : loc.status_pengiriman === "dalam_pengiriman" ? "Delivering order" : loc.status}
+        </span>
+      </div>`;
+
+      if (markers.has(id)) {
+        const marker = markers.get(id)!;
+        marker.setIcon(icon);
+        marker.setPopupContent(popupHtml);
+
+        const prev = prevLocations.get(id);
+        if (animFrames.has(id)) {
+          cancelAnimationFrame(animFrames.get(id)!);
+        }
+
+        if (prev) {
+          const from = { lat: prev.lat, lng: prev.lng };
+          const to = { lat: loc.lat, lng: loc.lng };
+          const duration = 2000;
+          const start = performance.now();
+
+          function animate(time: number) {
+            const t = Math.min((time - start) / duration, 1);
+            marker.setLatLng([
+              from.lat + (to.lat - from.lat) * t,
+              from.lng + (to.lng - from.lng) * t,
+            ]);
+            if (t < 1) {
+              animFrames.set(id, requestAnimationFrame(animate));
+            } else {
+              animFrames.delete(id);
+            }
+          }
+
+          animFrames.set(id, requestAnimationFrame(animate));
+        } else {
+          marker.setLatLng(newPos);
+        }
+      } else {
+        const marker = L.marker(newPos, { icon });
+        marker.bindPopup(popupHtml);
+        marker.addTo(map);
+        markers.set(id, marker);
+      }
+
+      prevLocations.set(id, { lat: loc.lat, lng: loc.lng });
+    }
+  }, [locations, map]);
+
+  useEffect(() => {
+    const markers = markersRef.current;
+    const animFrames = animFramesRef.current;
+    return () => {
+      for (const [, frameId] of animFrames) {
+        cancelAnimationFrame(frameId);
+      }
+      animFrames.clear();
+      for (const [, marker] of markers) {
+        map.removeLayer(marker);
+      }
+      markers.clear();
+      prevLocationsRef.current.clear();
+    };
+  }, [map]);
+
+  return null;
+}
+
 export default function AdminLiveMap() {
   const [locations, setLocations] = useState<DriverLocation[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -125,31 +225,7 @@ export default function AdminLiveMap() {
                 </Popup>
               </Marker>
             ))}
-            {locations.map((loc) => (
-              <Marker
-                key={loc.driver_id}
-                position={[loc.lat, loc.lng]}
-                icon={getDriverIcon(loc.status, loc.status_pengiriman)}
-              >
-                <Popup>
-                  <div style={{ fontFamily: "Quicksand, sans-serif", padding: 4 }}>
-                    <strong>{loc.nama}</strong>
-                    <br />
-                    {loc.jenis_kendaraan} &middot; {loc.no_plat}
-                    <br />
-                    <Star size={14} className="star-icon" /> {loc.rating.toFixed(2)}
-                    <br />
-                    <span style={{ fontSize: 12, color: "#6b7280" }}>
-                      {loc.status_pengiriman === "menuju_restoran"
-                        ? "Heading to restaurant"
-                        : loc.status_pengiriman === "dalam_pengiriman"
-                        ? "Delivering order"
-                        : loc.status}
-                    </span>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            <AdminAnimatedMarkers locations={locations} />
           </MapContainer>
         )}
         <div className="admin-map-legend">
