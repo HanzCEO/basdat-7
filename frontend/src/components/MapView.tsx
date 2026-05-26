@@ -90,12 +90,14 @@ function AnimatedDriverMarker({
   const map = useMap();
   const markerRef = useRef<L.Marker | null>(null);
   const animFrameRef = useRef<number>(0);
+  const prevProgressRef = useRef<number | null>(null);
 
   useEffect(() => {
     const marker = L.marker([0, 0], { icon: driverIcon });
     marker.bindPopup('<div class="driver-popup"><strong>Driver</strong></div>');
     marker.addTo(map);
     markerRef.current = marker;
+    prevProgressRef.current = null;
     return () => {
       cancelAnimationFrame(animFrameRef.current);
       map.removeLayer(marker);
@@ -107,26 +109,23 @@ function AnimatedDriverMarker({
     if (!marker || driverProgress == null || !routeCoords || routeCoords.length === 0) return;
 
     const reversed = [...routeCoords].reverse();
-    const target = getPositionAlongRoute(reversed, driverProgress);
+    const prevProgress = prevProgressRef.current;
+    prevProgressRef.current = driverProgress;
 
     cancelAnimationFrame(animFrameRef.current);
 
-    const current = marker.getLatLng();
-    const dist = Math.hypot(current.lat - target[0], current.lng - target[1]);
-
-    if (dist > 0.5) {
-      marker.setLatLng(target);
+    if (prevProgress == null) {
+      marker.setLatLng(getPositionAlongRoute(reversed, driverProgress));
       return;
     }
 
-    const from = { lat: current.lat, lng: current.lng };
-    const to = { lat: target[0], lng: target[1] };
     const duration = 900;
     const start = performance.now();
 
     function animate(time: number) {
       const t = Math.min((time - start) / duration, 1);
-      marker.setLatLng([from.lat + (to.lat - from.lat) * t, from.lng + (to.lng - from.lng) * t]);
+      const interpProgress = prevProgress + (driverProgress - prevProgress) * t;
+      marker.setLatLng(getPositionAlongRoute(reversed, interpProgress));
       if (t < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       }
