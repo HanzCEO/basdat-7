@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { CartProvider, useCart } from "./context/CartContext";
 import { Restaurant, Driver } from "./types";
-import { generateNearbyRestaurants, mockDrivers } from "./data/mockData";
+import { getRestaurants } from "./services/api";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
 import PullUpMenu from "./components/PullUpMenu";
@@ -16,6 +16,7 @@ function AppContent() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [phase, setPhase] = useState<'order' | 'delivery'>('order');
   const [driver, setDriver] = useState<Driver | null>(null);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const { clearCart } = useCart();
 
   useEffect(() => {
@@ -29,12 +30,11 @@ function AppContent() {
     );
   }, []);
 
-  const location = userLocation ?? DEFAULT_LOCATION;
+  useEffect(() => {
+    getRestaurants().then(setRestaurants).catch(console.error);
+  }, []);
 
-  const restaurants = useMemo(
-    () => generateNearbyRestaurants(location.lat, location.lng),
-    [location]
-  );
+  const location = userLocation ?? DEFAULT_LOCATION;
 
   const filteredRestaurants = useMemo(() => {
     if (!searchQuery) return restaurants;
@@ -44,8 +44,6 @@ function AppContent() {
   }, [searchQuery, restaurants]);
 
   const handleDispatch = useCallback(() => {
-    const randomDriver = mockDrivers[Math.floor(Math.random() * mockDrivers.length)];
-    setDriver(randomDriver);
     setPhase('delivery');
     clearCart();
   }, [clearCart]);
